@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-23T12:56:14.196Z</updated>
+  <updated>2022-10-23T13:01:07.509Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -21,16 +21,34 @@
     <link href="https://maijun-sec.github.io/2022/10/23/sast-theory-intro/"/>
     <id>https://maijun-sec.github.io/2022/10/23/sast-theory-intro/</id>
     <published>2022-10-23T07:21:03.000Z</published>
-    <updated>2022-10-23T12:56:14.196Z</updated>
+    <updated>2022-10-23T13:01:07.509Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;1-面向源码的静态分析概念&quot;&gt;&lt;a href=&quot;#1-面向源码的静态分析概念&quot; class=&quot;headerlink&quot; title=&quot;1. 面向源码的静态分析概念&quot;&gt;&lt;/a&gt;1.</summary>
-        
-      
+    <summary type="html">&lt;h2 id=&quot;1-面向源码的静态分析概念&quot;&gt;&lt;a href=&quot;#1-面向源码的静态分析概念&quot; class=&quot;headerlink&quot; title=&quot;1. 面向源码的静态分析概念&quot;&gt;&lt;/a&gt;1. 面向源码的静态分析概念&lt;/h2&gt;&lt;p&gt;软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;分类依据&lt;/th&gt;
+&lt;th&gt;分类结果&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;分析的输入&lt;/td&gt;
+&lt;td&gt;基于源码的分析和基于二进制的分析&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;是否需要执行代码&lt;/td&gt;
+&lt;td&gt;静态分析和动态分析&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;分析方法&lt;/td&gt;
+&lt;td&gt;面向语法的分析和面向语义的分析&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;使用的具体算法&lt;/td&gt;
+&lt;td&gt;符号执行、抽象解释、定理证明、数据流分析等&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;</summary>
     
     
     
