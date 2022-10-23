@@ -212,7 +212,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/23/sast-theory-intro-md/" class="post-title-link" itemprop="url">sast_theory_intro.md</a>
+          <a href="/2022/10/23/sast-theory-intro-md/" class="post-title-link" itemprop="url">面向源码的静态代码分析简介</a>
         </h2>
 
         <div class="post-meta-container">
@@ -224,7 +224,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2022-10-23 15:21:03 / 修改时间：16:12:41" itemprop="dateCreated datePublished" datetime="2022-10-23T15:21:03+08:00">2022-10-23</time>
+      <time title="创建时间：2022-10-23 15:21:03 / 修改时间：16:22:24" itemprop="dateCreated datePublished" datetime="2022-10-23T15:21:03+08:00">2022-10-23</time>
     </span>
 
   
@@ -237,13 +237,31 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="面向源码的静态代码分析简介"><a href="#面向源码的静态代码分析简介" class="headerlink" title="面向源码的静态代码分析简介"></a>面向源码的静态代码分析简介</h1><h2 id="1-面向源码的静态分析概念"><a href="#1-面向源码的静态分析概念" class="headerlink" title="1. 面向源码的静态分析概念"></a>1. 面向源码的静态分析概念</h2><p>软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：</p>
-<ul>
-<li>从分析输入分类：基于源码的分析和基于二进制可执行文件的分析</li>
-<li>从是否需要执行分类：静态分析和动态分析</li>
-<li>从分析方法分类：面向语法的分析和面向语义的分析</li>
-<li>从使用的算法分类：迭代数据流分析、符号执行、抽象解释、定理证明等。</li>
-</ul>
+          <h2 id="1-面向源码的静态分析概念"><a href="#1-面向源码的静态分析概念" class="headerlink" title="1. 面向源码的静态分析概念"></a>1. 面向源码的静态分析概念</h2><p>软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：</p>
+<table>
+<thead>
+<tr>
+<th>分类依据</th>
+<th>分类结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>分析的输入</td>
+<td>基于源码的分析和基于二进制的分析</td>
+</tr>
+<tr>
+<td>是否需要执行代码</td>
+<td>静态分析和动态分析</td>
+</tr>
+<tr>
+<td>分析方法</td>
+<td>面向语法的分析和面向语义的分析</td>
+</tr>
+<tr>
+<td>使用的具体算法</td>
+<td>符号执行、抽象解释、定理证明、数据流分析等</td>
+</tr>
+</tbody></table>
 <p>这里简单介绍面向源码的静态代码分析的相关的内容。从上面的几个名词约束，其分析的范围：</p>
 <ul>
 <li>面向源码的分析：或者是以源码为输入的分析</li>
