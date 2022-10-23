@@ -3,11 +3,11 @@
   <title>静态分析技术分享</title>
   
   
-  <link href="https://github.com/maijun-sec/maijun-sec.github.io/atom.xml" rel="self"/>
+  <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
-  <link href="https://github.com/maijun-sec/maijun-sec.github.io/"/>
+  <link href="https://maijun-sec.github.io/"/>
   <updated>2022-10-23T01:20:06.904Z</updated>
-  <id>https://github.com/maijun-sec/maijun-sec.github.io/</id>
+  <id>https://maijun-sec.github.io/</id>
   
   <author>
     <name>maijun</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="https://github.com/maijun-sec/maijun-sec.github.io/2022/10/23/hello-world/"/>
-    <id>https://github.com/maijun-sec/maijun-sec.github.io/2022/10/23/hello-world/</id>
+    <link href="https://maijun-sec.github.io/2022/10/23/hello-world/"/>
+    <id>https://maijun-sec.github.io/2022/10/23/hello-world/</id>
     <published>2022-10-23T01:20:06.904Z</published>
     <updated>2022-10-23T01:20:06.904Z</updated>
     
