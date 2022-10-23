@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>程序静态分析技术分享</title>
+  <title>程序静态分析技术笔记</title>
   
   
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
