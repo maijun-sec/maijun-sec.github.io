@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>面向源码的静态代码分析简介</title>
-    <url>/2022/10/23/sast-theory-intro-md/</url>
+    <url>/2022/10/23/sast-theory-intro/</url>
     <content><![CDATA[<h2 id="1-面向源码的静态分析概念"><a href="#1-面向源码的静态分析概念" class="headerlink" title="1. 面向源码的静态分析概念"></a>1. 面向源码的静态分析概念</h2><p>软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：</p>
 <table>
 <thead>

@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-23T12:15:10.707Z</updated>
+  <updated>2022-10-23T12:19:50.936Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -18,10 +18,10 @@
   
   <entry>
     <title>面向源码的静态代码分析简介</title>
-    <link href="https://maijun-sec.github.io/2022/10/23/sast-theory-intro-md/"/>
-    <id>https://maijun-sec.github.io/2022/10/23/sast-theory-intro-md/</id>
+    <link href="https://maijun-sec.github.io/2022/10/23/sast-theory-intro/"/>
+    <id>https://maijun-sec.github.io/2022/10/23/sast-theory-intro/</id>
     <published>2022-10-23T07:21:03.000Z</published>
-    <updated>2022-10-23T12:15:10.707Z</updated>
+    <updated>2022-10-23T12:19:50.936Z</updated>
     
     
       
