@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-23T01:20:06.904Z</updated>
+  <updated>2022-10-23T08:12:41.055Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -17,18 +17,18 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Hello World</title>
-    <link href="https://maijun-sec.github.io/2022/10/23/hello-world/"/>
-    <id>https://maijun-sec.github.io/2022/10/23/hello-world/</id>
-    <published>2022-10-23T01:20:06.904Z</published>
-    <updated>2022-10-23T01:20:06.904Z</updated>
+    <title>sast_theory_intro.md</title>
+    <link href="https://maijun-sec.github.io/2022/10/23/sast-theory-intro-md/"/>
+    <id>https://maijun-sec.github.io/2022/10/23/sast-theory-intro-md/</id>
+    <published>2022-10-23T07:21:03.000Z</published>
+    <updated>2022-10-23T08:12:41.055Z</updated>
     
     
       
       
         
         
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt;</summary>
+    <summary type="html">&lt;h1 id=&quot;面向源码的静态代码分析简介&quot;&gt;&lt;a href=&quot;#面向源码的静态代码分析简介&quot; class=&quot;headerlink&quot; title=&quot;面向源码的静态代码分析简介&quot;&gt;&lt;/a&gt;面向源码的静态代码分析简介&lt;/h1&gt;&lt;h2 id=&quot;1-面向源码的静态分析概念&quot;&gt;&lt;a</summary>
         
       
     

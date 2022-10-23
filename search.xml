@@ -1,21 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hello World</title>
-    <url>/2022/10/23/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-]]></content>
+    <title>sast_theory_intro.md</title>
+    <url>/2022/10/23/sast-theory-intro-md/</url>
+    <content><![CDATA[<h1 id="面向源码的静态代码分析简介"><a href="#面向源码的静态代码分析简介" class="headerlink" title="面向源码的静态代码分析简介"></a>面向源码的静态代码分析简介</h1><h2 id="1-面向源码的静态分析概念"><a href="#1-面向源码的静态分析概念" class="headerlink" title="1. 面向源码的静态分析概念"></a>1. 面向源码的静态分析概念</h2><p>软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：</p>
+<ul>
+<li>从分析输入分类：基于源码的分析和基于二进制可执行文件的分析</li>
+<li>从是否需要执行分类：静态分析和动态分析</li>
+<li>从分析方法分类：面向语法的分析和面向语义的分析</li>
+<li>从使用的算法分类：迭代数据流分析、符号执行、抽象解释、定理证明等。</li>
+</ul>
+<p>这里简单介绍面向源码的静态代码分析的相关的内容。从上面的几个名词约束，其分析的范围：</p>
+<ul>
+<li>面向源码的分析：或者是以源码为输入的分析</li>
+<li>不需要运行代码：静态分析，因此分析过程中不需要运行代码</li>
+<li>分析的方法和算法：基于业务目标，可涵盖可用的所有的分析方法</li>
+</ul>
+<p>我们从事软件开发的同事，对这类工具不会陌生，其广泛应用与我们的开发过程中，而且有非常多的典型工具。</p>
+<h2 id="2-面向源码的静态分析工具的应用"><a href="#2-面向源码的静态分析工具的应用" class="headerlink" title="2. 面向源码的静态分析工具的应用"></a>2. 面向源码的静态分析工具的应用</h2><p>面向源码的静态代码分析的典型应用：</p>
+<ul>
+<li>编程规范遵从</li>
+<li>软件缺陷及安全分析，例如死锁、数据竞争、缓冲区溢出、信息泄露、注入等；</li>
+<li>安全分析：信息泄露、代码注入等</li>
+<li>缺陷分类分级：告警合并、告警等级判断</li>
+<li>缺陷自动修复：Patch自动生成、代码推荐</li>
+<li>程序理解：IDE工具、函数调用关系、软件构建依赖等</li>
+<li>代码度量：圈复杂度、代码深度等</li>
+<li>性能分析：死代码消除、循环不变量的代码移动等</li>
+</ul>
+<p>我们可以看到，面向源码的静态代码分析，主要应用与软件的开发过程，应用与 IDE 和 代码提交 及 构建过程，可以很好的和企业的 DevSecOps 过程（或者说 CI&#x2F;CD 过程）进行集成，因此应用非常广泛。相对于其它的分类的程序分析，这类工具也是最多的。</p>
+<h2 id="3-面向源码的静态分析工具的实现"><a href="#3-面向源码的静态分析工具的实现" class="headerlink" title="3. 面向源码的静态分析工具的实现"></a>3. 面向源码的静态分析工具的实现</h2><p>面向源码的静态代码分析，是编译原理技术的延伸，或者说，静态代码分析技术，是随着编译原理技术发展起来的。</p>
+<p>当然，不仅仅是面向源码的静态分析工具，应该说，整个软件分析，都是随着编译原理技术延伸出来的。因此，编译原理的相关知识，是软件分析的基础。</p>
+<p>我们通常实现一款面向源码的分析工具，就是实现一款可以自动分析一个程序，可以自动分析出上面提到的可以做到的那些应用（程序的正确性、可靠性、安全性等）。</p>
+<p>为了能够很好地实现这样的一款工具，从大方向上，需要下面的两点内容：</p>
+<ul>
+<li>精确的程序表示（例如AST，CFG，CG，IR，SSA，CDG，DDG，PDG，SDG等）</li>
+<li>系统的方法（数据流分析、符号执行、抽象解释等）基于这个表示来推导是否有某种属性（某类问题或者缺陷）</li>
+</ul>
+<p>这一部分可以延伸出来很多的知识点，上面提到的概念也有点儿多，后面会进行一系列地介绍。这里宽泛的解释就是：我们要自动地分析源码，就首先需要把源码表示成某种等价的适合分析的形式，然后用特定的分析算法，来分析这种形式，从而得到分析结果（前面提到的可以做到的事情）。</p>
+<h2 id="4-面向源码的静态分析的局限性"><a href="#4-面向源码的静态分析的局限性" class="headerlink" title="4. 面向源码的静态分析的局限性"></a>4. 面向源码的静态分析的局限性</h2>]]></content>
   </entry>
 </search>
