@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-23T13:01:07.509Z</updated>
+  <updated>2022-10-24T13:02:14.521Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -17,11 +17,76 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>静态代码分析中间表示基本概念</title>
+    <link href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/"/>
+    <id>https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/</id>
+    <published>2022-10-24T12:29:19.000Z</published>
+    <updated>2022-10-24T13:02:14.521Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在华为云bbs上的原创文章，原文链接是：&lt;a href=&quot;https://bbs.huaweicloud.com/blogs/227535&quot;&gt;https://bbs.huaweicloud.com/blogs/227535&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;0-简介&quot;&gt;&lt;a href=&quot;#0-简介&quot; class=&quot;headerlink&quot; title=&quot;0 简介&quot;&gt;&lt;/a&gt;0 简介&lt;/h2&gt;&lt;p&gt;静态代码分析是指在不实际执行程序的情况下，对代码语义和行为进行分析，由此找出程序中由于错误的编码导致异常的程序语义或未定义的行为。它能在软件开发流程早期就发现代码中的各种问题，从而提高开发效率和软件质量。&lt;/p&gt;
+&lt;p&gt;静态代码分析，从工具实现的角度，就是开发一款分析器，对程序源代码进行分析，识别程序中的各种类型的问题。为了识别这些问题，开发分析器就需要不同的实现方式（算法），这时候，为了让分析器在实现时更加简洁、高效，就需要对源代码进行处理，转换为一种针对特定的分析器算法和源码在语义上等价的，但是更加简洁、高效、实用的表示形式，也就是中间表示。&lt;/p&gt;
+&lt;p&gt;就像源码，里面包含各种注释等内容，很不方便分析，一般也不会基于源码来直接分析，都会转换为某种格式来分析。当然，我们介绍的都是当前静态代码分析（编译原理）里面最经典的一些中间表示。首先，会介绍一下AST，然后会介绍一下三地址码，随后介绍一下SSA形式的三地址码，最后介绍一下什么是CFG（包括BB块）和CG。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="程序分析" scheme="https://maijun-sec.github.io/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/"/>
+    
+    <category term="程序表示" scheme="https://maijun-sec.github.io/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
+    
+    
+    <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
+    
+    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
+    
+    <category term="三地址码" scheme="https://maijun-sec.github.io/tags/%E4%B8%89%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
+    
+    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
+    
+    <category term="BasicBlock" scheme="https://maijun-sec.github.io/tags/BasicBlock/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>用于静态代码分析的程序表示</title>
+    <link href="https://maijun-sec.github.io/2022/10/24/program-representation/"/>
+    <id>https://maijun-sec.github.io/2022/10/24/program-representation/</id>
+    <published>2022-10-24T12:25:28.000Z</published>
+    <updated>2022-10-24T12:27:31.604Z</updated>
+    
+    
+    
+    
+    <category term="程序分析" scheme="https://maijun-sec.github.io/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/"/>
+    
+    <category term="程序表示" scheme="https://maijun-sec.github.io/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
+    
+    
+    <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
+    
+    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
+    
+    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
+    
+    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
+    
+    <category term="PDG" scheme="https://maijun-sec.github.io/tags/PDG/"/>
+    
+    <category term="CDG" scheme="https://maijun-sec.github.io/tags/CDG/"/>
+    
+    <category term="DDG" scheme="https://maijun-sec.github.io/tags/DDG/"/>
+    
+    <category term="SDG" scheme="https://maijun-sec.github.io/tags/SDG/"/>
+    
+  </entry>
+  
+  <entry>
     <title>面向源码的静态代码分析简介</title>
     <link href="https://maijun-sec.github.io/2022/10/23/sast-theory-intro/"/>
     <id>https://maijun-sec.github.io/2022/10/23/sast-theory-intro/</id>
     <published>2022-10-23T07:21:03.000Z</published>
-    <updated>2022-10-23T13:01:07.509Z</updated>
+    <updated>2022-10-24T12:22:47.045Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-面向源码的静态分析概念&quot;&gt;&lt;a href=&quot;#1-面向源码的静态分析概念&quot; class=&quot;headerlink&quot; title=&quot;1. 面向源码的静态分析概念&quot;&gt;&lt;/a&gt;1. 面向源码的静态分析概念&lt;/h2&gt;&lt;p&gt;软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：&lt;/p&gt;
