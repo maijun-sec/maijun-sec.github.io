@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-24T13:16:15.535Z</updated>
+  <updated>2022-10-24T13:20:58.991Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>\[转载\]静态代码分析中间表示基本概念</title>
+    <title>【转载】静态代码分析中间表示基本概念</title>
     <link href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/"/>
     <id>https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/</id>
     <published>2022-10-24T12:29:19.000Z</published>
-    <updated>2022-10-24T13:16:15.535Z</updated>
+    <updated>2022-10-24T13:20:58.991Z</updated>
     
     
     <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在华为云bbs上的原创文章，原文链接是：&lt;a href=&quot;https://bbs.huaweicloud.com/blogs/227535&quot;&gt;https://bbs.huaweicloud.com/blogs/227535&lt;/a&gt;&lt;/p&gt;

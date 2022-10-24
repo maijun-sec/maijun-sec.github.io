@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>\[转载\]静态代码分析中间表示基本概念</title>
+    <title>【转载】静态代码分析中间表示基本概念</title>
     <url>/2022/10/24/program-representation-ast-ssa/</url>
     <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在华为云bbs上的原创文章，原文链接是：<a href="https://bbs.huaweicloud.com/blogs/227535">https://bbs.huaweicloud.com/blogs/227535</a></p>
 <h2 id="0-简介"><a href="#0-简介" class="headerlink" title="0 简介"></a>0 简介</h2><p>静态代码分析是指在不实际执行程序的情况下，对代码语义和行为进行分析，由此找出程序中由于错误的编码导致异常的程序语义或未定义的行为。它能在软件开发流程早期就发现代码中的各种问题，从而提高开发效率和软件质量。</p>
