@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-25T14:08:56.091Z</updated>
+  <updated>2022-10-25T15:08:49.479Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>用于静态代码分析的程序表示——AST获取</title>
+    <link href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/"/>
+    <id>https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/</id>
+    <published>2022-10-25T14:32:40.000Z</published>
+    <updated>2022-10-25T15:08:49.479Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;1-概述&quot;&gt;&lt;a href=&quot;#1-概述&quot; class=&quot;headerlink&quot; title=&quot;1. 概述&quot;&gt;&lt;/a&gt;1. 概述&lt;/h2&gt;&lt;p&gt;我们这里，标题用 AST获取，而不是</summary>
+        
+      
+    
+    
+    
+    <category term="程序分析" scheme="https://maijun-sec.github.io/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/"/>
+    
+    <category term="程序表示" scheme="https://maijun-sec.github.io/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
+    
+    
+    <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
+    
+  </entry>
   
   <entry>
     <title>【转载】静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</title>
@@ -36,11 +63,11 @@
     
     <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
     
+    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
+    
     <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
     <category term="三地址码" scheme="https://maijun-sec.github.io/tags/%E4%B8%89%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
-    
-    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
     
     <category term="BasicBlock" scheme="https://maijun-sec.github.io/tags/BasicBlock/"/>
     
@@ -66,11 +93,9 @@
     
     <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
     
-    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
+    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
     
     <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
-    
-    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
     
     <category term="PDG" scheme="https://maijun-sec.github.io/tags/PDG/"/>
     
@@ -79,6 +104,8 @@
     <category term="DDG" scheme="https://maijun-sec.github.io/tags/DDG/"/>
     
     <category term="SDG" scheme="https://maijun-sec.github.io/tags/SDG/"/>
+    
+    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
   </entry>
   

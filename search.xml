@@ -1,6 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>用于静态代码分析的程序表示——AST获取</title>
+    <url>/2022/10/25/program-representation-ast-gen/</url>
+    <content><![CDATA[<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。</p>
+<p>当然，有时候已有的开源工具或者框架对于我们来说可能并不合适，这个时候还是要自己生成的。</p>
+<h2 id="2-常用的代码-AST-获取或生成方法"><a href="#2-常用的代码-AST-获取或生成方法" class="headerlink" title="2. 常用的代码 AST 获取或生成方法"></a>2. 常用的代码 AST 获取或生成方法</h2><h3 id="2-1-选择已有的开源代码或者框架"><a href="#2-1-选择已有的开源代码或者框架" class="headerlink" title="2.1 选择已有的开源代码或者框架"></a>2.1 选择已有的开源代码或者框架</h3><p>这里，简单介绍一些面向主流语言，常有的一些框架如下：</p>
+<table>
+<thead>
+<tr>
+<th>语言</th>
+<th>开源框架及静态分析工具或编译器</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Java</td>
+<td>JDT、JavaParser、PMD、CheckStyle等</td>
+</tr>
+<tr>
+<td>C&#x2F;C++</td>
+<td>CDT、CppCheck、Clang等</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>Python自带的 ast 模块、Bandit、flake8等</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>Babel、espree、eslint、prettier 等</td>
+</tr>
+</tbody></table>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>Java 的 findbugs 是扫描 class 文件的，没有列在上面</li>
+<li>针对 JavaParser，有一个介绍，可以参考：<font color="red">待补充</font></li>
+</ul>
+<p>当我们开发程序分析工具时，需要 AST 的情况下，首选当然是开源代码，可以快速实现开发，快速迭代。但是，如果需要支持多种语言，并且希望针对多种语言，统一 AST 格式，则还是需要自己生成 AST。</p>
+<h3 id="2-2-基于-Antlr4-或者-Java-CC-生成-AST"><a href="#2-2-基于-Antlr4-或者-Java-CC-生成-AST" class="headerlink" title="2.2 基于 Antlr4 或者 Java CC 生成 AST"></a>2.2 基于 Antlr4 或者 Java CC 生成 AST</h3><p>Antlr4是一款基于Java开发的开源的语法分析器生成工具，广泛应用于DSL构建，语言词法语法解析，静态代码分析等领域。针对 Antlr4 的介绍和使用，大家可以参考文章：<font color="red">待补充</font></p>
+<h4 id="2-2-1-具体语法树和抽象语法树"><a href="#2-2-1-具体语法树和抽象语法树" class="headerlink" title="2.2.1 具体语法树和抽象语法树"></a>2.2.1 具体语法树和抽象语法树</h4><p><font color="red">待补充</font></p>
+<h4 id="2-2-2-从具体语法树到抽象语法树"><a href="#2-2-2-从具体语法树到抽象语法树" class="headerlink" title="2.2.2 从具体语法树到抽象语法树"></a>2.2.2 从具体语法树到抽象语法树</h4><p><font color="red">待补充</font></p>
+<h4 id="2-2-3-token获取"><a href="#2-2-3-token获取" class="headerlink" title="2.2.3 token获取"></a>2.2.3 token获取</h4><p><font color="red">待补充</font></p>
+<h3 id="2-3-基于词法分析生成"><a href="#2-3-基于词法分析生成" class="headerlink" title="2.3 基于词法分析生成"></a>2.3 基于词法分析生成</h3><p>说实话，自己解析 token，然后通过自己实现 上下文无关文法 的解析，然后构造 AST，我还没有做过，这里就先不介绍了，大家可以参考部分编译器（例如 clang）的实现，或者看看 Antlr4 的源码。以后我要是做到了这部分工作，我再回来补充。</p>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><p><font color="red">待补充</font></p>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+      </categories>
+      <tags>
+        <tag>AST</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用于静态代码分析的程序表示——概述</title>
+    <url>/2022/10/24/program-representation/</url>
+    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
+<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
+<span id="more"></span>
+
+<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
+<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
+<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
+<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
+<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
+<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
+<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
+<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
+<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
+<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
+<ul>
+<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念</a>。</li>
+<li>AST 的生成方式介绍，<font color="red">待补充</font></li>
+<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
+<li>SSA 的生成方式介绍，<font color="red">待补充</font></li>
+</ul>
+<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
+<ul>
+<li>涉及到这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念</a>。</li>
+<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
+</ul>
+<h3 id="2-3-CG"><a href="#2-3-CG" class="headerlink" title="2.3 CG"></a>2.3 CG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-4-ICFG"><a href="#2-4-ICFG" class="headerlink" title="2.4 ICFG"></a>2.4 ICFG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-5-CDG、DDG、PDG、SDG"><a href="#2-5-CDG、DDG、PDG、SDG" class="headerlink" title="2.5 CDG、DDG、PDG、SDG"></a>2.5 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-6-PAG、VFG"><a href="#2-6-PAG、VFG" class="headerlink" title="2.6 PAG、VFG"></a>2.6 PAG、VFG</h3><p><font color="red">待补充</font></p>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+      </categories>
+      <tags>
+        <tag>AST</tag>
+        <tag>程序表示</tag>
+        <tag>CFG</tag>
+        <tag>PDG</tag>
+        <tag>CDG</tag>
+        <tag>DDG</tag>
+        <tag>SDG</tag>
+        <tag>SSA</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【转载】静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</title>
     <url>/2022/10/24/program-representation-ast-ssa/</url>
     <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在华为云bbs上的原创文章，原文链接是：<a href="https://bbs.huaweicloud.com/blogs/227535">https://bbs.huaweicloud.com/blogs/227535</a></p>
@@ -123,58 +222,10 @@
       </categories>
       <tags>
         <tag>AST</tag>
+        <tag>CFG</tag>
         <tag>SSA</tag>
         <tag>三地址码</tag>
-        <tag>CFG</tag>
         <tag>BasicBlock</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>用于静态代码分析的程序表示——概述</title>
-    <url>/2022/10/24/program-representation/</url>
-    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
-<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
-<span id="more"></span>
-
-<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
-<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
-<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
-<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
-<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
-<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
-<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
-<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
-<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
-<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
-<ul>
-<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念</a>。</li>
-<li>AST 的生成方式介绍，<font color="red">待补充</font></li>
-<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
-<li>SSA 的生成方式介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
-<ul>
-<li>涉及到这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念</a>。</li>
-<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-3-CG"><a href="#2-3-CG" class="headerlink" title="2.3 CG"></a>2.3 CG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-4-ICFG"><a href="#2-4-ICFG" class="headerlink" title="2.4 ICFG"></a>2.4 ICFG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-5-CDG、DDG、PDG、SDG"><a href="#2-5-CDG、DDG、PDG、SDG" class="headerlink" title="2.5 CDG、DDG、PDG、SDG"></a>2.5 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-6-PAG、VFG"><a href="#2-6-PAG、VFG" class="headerlink" title="2.6 PAG、VFG"></a>2.6 PAG、VFG</h3><p><font color="red">待补充</font></p>
-]]></content>
-      <categories>
-        <category>程序分析</category>
-        <category>程序表示</category>
-      </categories>
-      <tags>
-        <tag>AST</tag>
-        <tag>SSA</tag>
-        <tag>CFG</tag>
-        <tag>程序表示</tag>
-        <tag>PDG</tag>
-        <tag>CDG</tag>
-        <tag>DDG</tag>
-        <tag>SDG</tag>
       </tags>
   </entry>
   <entry>
