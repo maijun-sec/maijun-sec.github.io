@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-25T15:44:18.604Z</updated>
+  <updated>2022-10-25T15:45:20.522Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -21,16 +21,12 @@
     <link href="https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/"/>
     <id>https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/</id>
     <published>2022-10-25T15:13:56.000Z</published>
-    <updated>2022-10-25T15:44:18.604Z</updated>
+    <updated>2022-10-25T15:45:20.522Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在 infoq 上的原创文章，原文链接是：&lt;a</summary>
-        
-      
+    <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在 infoq 上的原创文章，原文链接是：&lt;a href=&quot;https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96&quot;&gt;https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;0-Java-Parser-基本信息&quot;&gt;&lt;a href=&quot;#0-Java-Parser-基本信息&quot; class=&quot;headerlink&quot; title=&quot;0. Java Parser 基本信息&quot;&gt;&lt;/a&gt;0. Java Parser 基本信息&lt;/h2&gt;&lt;p&gt;Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。&lt;/p&gt;
+&lt;p&gt;Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。&lt;/p&gt;</summary>
     
     
     

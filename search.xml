@@ -236,6 +236,8 @@
     <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96">https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96</a></p>
 <h2 id="0-Java-Parser-基本信息"><a href="#0-Java-Parser-基本信息" class="headerlink" title="0. Java Parser 基本信息"></a>0. Java Parser 基本信息</h2><p>Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。</p>
 <p>Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。</p>
+<span id="more"></span>
+
 <p>Java Parser 的组件架构（<a href="https://javaparser.org/code-style-architecture/%EF%BC%89%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%EF%BC%9A">https://javaparser.org/code-style-architecture/）如下图所示：</a></p>
 <p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser.png"></p>
 <center>图 0-1 Java Parser 组件架构</center>
