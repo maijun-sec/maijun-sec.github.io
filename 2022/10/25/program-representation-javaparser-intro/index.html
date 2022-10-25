@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/javaparser.png">
 <meta property="og:image" content="https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/javaparser-dot.png">
 <meta property="article:published_time" content="2022-10-25T15:13:56.000Z">
-<meta property="article:modified_time" content="2022-10-25T15:45:20.522Z">
+<meta property="article:modified_time" content="2022-10-25T15:53:03.167Z">
 <meta property="article:author" content="maijun">
 <meta property="article:tag" content="JavaParser">
 <meta name="twitter:card" content="summary">
@@ -244,7 +244,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2022-10-25 23:13:56 / 修改时间：23:45:20" itemprop="dateCreated datePublished" datetime="2022-10-25T23:13:56+08:00">2022-10-25</time>
+      <time title="创建时间：2022-10-25 23:13:56 / 修改时间：23:53:03" itemprop="dateCreated datePublished" datetime="2022-10-25T23:13:56+08:00">2022-10-25</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -280,7 +280,7 @@
 <center>图 0-1 Java Parser 组件架构</center>
 
 <p>本文讨论 Java Parser 面向 Java 规范检查方向的一些内容，因此我们不关心 Java Parser 在修改 AST 和重新生成 Java 文件方面的作用，着重介绍在生成 AST、AST 遍历、解析、类型推断及应用。</p>
-<p>说明：本文中所有的代码的完成代码，可以参考<a target="_blank" rel="noopener" href="https://gitee.com/maijun/javaparser-test/tree/master%E3%80%82">https://gitee.com/maijun/javaparser-test/tree/master。</a></p>
+<p>说明：本文中所有的代码的完成代码，可以参考<a target="_blank" rel="noopener" href="https://gitee.com/maijun/javaparser-test/tree/master">https://gitee.com/maijun/javaparser-test/tree/master</a>(<font color="red">暂时下线，待优化上线</font>)。</p>
 <h2 id="1-Java-Parser-AST-生成及打印"><a href="#1-Java-Parser-AST-生成及打印" class="headerlink" title="1. Java Parser AST 生成及打印"></a>1. Java Parser AST 生成及打印</h2><h3 id="1-1-Java-Parser-生成-AST"><a href="#1-1-Java-Parser-生成-AST" class="headerlink" title="1.1 Java Parser 生成 AST"></a>1.1 Java Parser 生成 AST</h3><p>Java Parser 转换生成 AST，有很多方法，主要支持两大类方式：</p>
 <h4 id="1-输入为文件"><a href="#1-输入为文件" class="headerlink" title="1) 输入为文件"></a>1) 输入为文件</h4><p>输入为文件，即针对完整的文件为输入，生成整个文件的 AST（对于 Java 来说，如果是整个 Java 文件，AST 的根节点为 CompilationUnit），这种方式，可以完整保留源码的代码行信息，这样方便进行分析。对于文件为输入，即输入文件路径（多种写法，例如 String、File、Path、Resource 等，其实都是表示文件路径），同时可以指定文件的编码方式，下面的用例，指定的是 nio 的 Path 格式的路径。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 转换的是完整的Java文件</span></span><br><span class="line"><span class="type">File</span> <span class="variable">base</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">relativePath</span> <span class="operator">=</span> <span class="string">&quot;test-case/javaparser-testcase/src/main/java/zmj/test/thread/MyThread.java&quot;</span>;</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> base.getCanonicalPath() + File.separator + relativePath;</span><br><span class="line">ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(Paths.get(absolutePath));</span><br><span class="line">result.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
