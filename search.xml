@@ -1,6 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>【转载】Antlr4简明使用教程</title>
+    <url>/2022/10/26/program-representation-altlr-basic/</url>
+    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://bbs.huaweicloud.com/blogs/226877">https://bbs.huaweicloud.com/blogs/226877</a></p>
+<h2 id="1-Antlr4简单介绍"><a href="#1-Antlr4简单介绍" class="headerlink" title="1. Antlr4简单介绍"></a>1. Antlr4简单介绍</h2><p>Antlr4（Another Tool for Language Recognition）是一款基于Java开发的开源的语法分析器生成工具，能够根据语法规则文件生成对应的语法分析器，广泛应用于DSL构建，语言词法语法解析等领域。现在在非常多的流行的框架中都用使用，例如，在构建特定语言的AST方面，CheckStyle工具，就是基于Antlr来解析Java的语法结构的（当前Java Parser是基于JavaCC来解析Java文件的，据说有规划在下个版本改用Antlr来解析），还有就是广泛应用在DSL构建上，著名的Eclipse Xtext就有使用Antlr。</p>
+<span id="more"></span>
+
+<p>Antlr可以生成不同target的AST（可参考：<a href="https://www.antlr.org/download.html">Antlr4下载地址</a>），包括Java、C++、JS、Python、C#等，可以满足不同语言的开发需求。当前Antlr最新稳定版本为4.9，Antlr4官方github仓库中，已经有数十种语言的grammer（<a href="https://github.com/antlr/grammars-v4%EF%BC%8C%E4%B8%8D%E8%BF%87%E8%99%BD%E7%84%B6%E8%BF%99%E4%B9%88%E5%A4%9A%E8%AF%AD%E8%A8%80%E7%9A%84%E8%A7%84%E5%88%99%E6%96%87%E6%B3%95%E5%AE%9A%E4%B9%89%E9%83%BD%E5%9C%A8%E4%B8%80%E4%B8%AA%E4%BB%93%E5%BA%93%E4%B8%AD%EF%BC%8C%E4%BD%86%E6%98%AF%E6%AF%8F%E7%A7%8D%E8%AF%AD%E8%A8%80%E7%9A%84grammer%E7%9A%84license%E6%98%AF%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%EF%BC%8C%E5%A6%82%E6%9E%9C%E8%A6%81%E4%BD%BF%E7%94%A8%EF%BC%8C%E9%9C%80%E8%A6%81%E5%8F%82%E8%80%83%E6%AF%8F%E7%A7%8D%E8%AF%AD%E8%A8%80%E8%87%AA%E5%B7%B1%E7%9A%84%E8%AF%AD%E6%B3%95%E7%BB%93%E6%9E%84%E7%9A%84license%EF%BC%89%E3%80%82">https://github.com/antlr/grammars-v4，不过虽然这么多语言的规则文法定义都在一个仓库中，但是每种语言的grammer的license是不一样的，如果要使用，需要参考每种语言自己的语法结构的license）。</a></p>
+<p>本文将首先介绍Antlr4 grammer的定义方式（简单介绍语法结构，并介绍如何基于IDEA Antlr4插件进行调试），然后介绍如何通过Antlr4 grammer生成对应的AST，最后介绍Antlr4 的两种AST遍历方式：Visitor方式和Listener方式。</p>
+<h2 id="2-Antlr4规则文法"><a href="#2-Antlr4规则文法" class="headerlink" title="2. Antlr4规则文法"></a>2. Antlr4规则文法</h2><p>下面简单介绍一部分Antlr4的g4（grammar）文件的写法（主要参考Antlr4官方wiki：<a href="https://github.com/antlr/antlr4/blob/master/doc/index.md">https://github.com/antlr/antlr4/blob/master/doc/index.md</a> ）。最有效的学习Antlr4的规则文法的写法的方法，就是参考已有的规则文法，大家在学习中，可以参考已有语言的文法。而且Antlr4已经实现了数十种语言的文法，如果需要自己定义，可以参考和自己的语言最接近的文法来开发。</p>
+<h3 id="2-1-Antlr4规则基本语法和关键字"><a href="#2-1-Antlr4规则基本语法和关键字" class="headerlink" title="2.1 Antlr4规则基本语法和关键字"></a>2.1 Antlr4规则基本语法和关键字</h3><p>首先，如果有一点儿C或者Java基础，对上手Antlr4 g4的文法非常快。主要有下面的一些文法结构：</p>
+<ul>
+<li>注释：和Java的注释完全一致，也可参考C的注释，只是增加了JavaDoc类型的注释；</li>
+<li>标志符：参考Java或者C的标志符命名规范，针对Lexer 部分的 Token 名的定义，采用全大写字母的形式，对于parser rule命名，推荐首字母小写的驼峰命名；</li>
+<li>不区分字符和字符串，都是用单引号引起来的，同时，虽然Antlr g4支持 Unicode编码（即支持中文编码），但是建议大家尽量还有英文；</li>
+<li>Action，行为，主要有@header 和@members，用来定义一些需要生成到目标代码中的行为，例如，可以通过@header设置生成的代码的package信息，@members可以定义额外的一些变量到Antlr4语法文件中；</li>
+<li>Antlr4语法中，支持的关键字有：import, fragment, lexer, parser, grammar, returns, locals, throws, catch, finally, mode, options, tokens。</li>
+</ul>
+<h3 id="2-2-Antlr4语法介绍"><a href="#2-2-Antlr4语法介绍" class="headerlink" title="2.2 Antlr4语法介绍"></a>2.2 Antlr4语法介绍</h3><h4 id="2-2-1语法文件的整体结构及写法示例"><a href="#2-2-1语法文件的整体结构及写法示例" class="headerlink" title="2.2.1语法文件的整体结构及写法示例"></a>2.2.1语法文件的整体结构及写法示例</h4><p>Antlr4整体结构如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">/** Optional javadoc style comment */</span><br><span class="line"></span><br><span class="line">grammar Name;</span><br><span class="line"></span><br><span class="line">options &#123;...&#125;</span><br><span class="line"></span><br><span class="line">import ... ;</span><br><span class="line">tokens &#123;...&#125;</span><br><span class="line"></span><br><span class="line">channels &#123;...&#125; // lexer only</span><br><span class="line"></span><br><span class="line">@actionName &#123;...&#125;</span><br><span class="line">rule1 // parser and lexer rules, possibly intermingled</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">ruleN</span><br></pre></td></tr></table></figure>
+
+<p>一般如果语法非常复杂，会基于Lexer和Parser写到两个不同的文件中（例如Java，可参考：<a href="https://github.com/antlr/grammars-v4/tree/master/java/java8">https://github.com/antlr/grammars-v4/tree/master/java/java8</a> ），如果语法比较简单，可以只写到一个文件中（例如Lua，可参考：<a href="https://github.com/antlr/grammars-v4/blob/master/lua/Lua.g4">https://github.com/antlr/grammars-v4/blob/master/lua/Lua.g4</a> ）。</p>
+<p>下面我们结合Lua.g4中的一部分语法结构，介绍使用方法。写Antlr4的文法，需要依据源码的结构来决定。定义时，依据源码文件的写法，从上到下开始构造语法结构。例如，下面是Lua.g4的一部分：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">chunk</span><br><span class="line">: block EOF</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">block</span><br><span class="line">: stat* retstat?</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">stat</span><br><span class="line">: &#x27;;&#x27;</span><br><span class="line">| varlist &#x27;=&#x27; explist</span><br><span class="line">| functioncall</span><br><span class="line">| label</span><br><span class="line">| &#x27;break&#x27;</span><br><span class="line">| &#x27;goto&#x27; NAME</span><br><span class="line">| &#x27;do&#x27; block &#x27;end&#x27;</span><br><span class="line">| &#x27;while&#x27; exp &#x27;do&#x27; block &#x27;end&#x27;</span><br><span class="line">| &#x27;repeat&#x27; block &#x27;until&#x27; exp</span><br><span class="line">| &#x27;if&#x27; exp &#x27;then&#x27; block (&#x27;elseif&#x27; exp &#x27;then&#x27; block)* (&#x27;else&#x27; block)? &#x27;end&#x27;</span><br><span class="line">| &#x27;for&#x27; NAME &#x27;=&#x27; exp &#x27;,&#x27; exp (&#x27;,&#x27; exp)? &#x27;do&#x27; block &#x27;end&#x27;</span><br><span class="line">| &#x27;for&#x27; namelist &#x27;in&#x27; explist &#x27;do&#x27; block &#x27;end&#x27;</span><br><span class="line">| &#x27;function&#x27; funcname funcbody</span><br><span class="line">| &#x27;local&#x27; &#x27;function&#x27; NAME funcbody</span><br><span class="line">| &#x27;local&#x27; attnamelist (&#x27;=&#x27; explist)?</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">attnamelist</span><br><span class="line">: NAME attrib (&#x27;,&#x27; NAME attrib)*</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<p>如上语法中，整个文件被表示成一个chunk，chunk表示为一个block和一个文件结束符（EOF）；block又被表示为一系列的语句的集合，而每一种语句又有特定的语法结构，包含了特定的表达式、关键字、变量、常量等信息，然后递归表达式的文法组成，变量的写法等，最终全部都归结到Lexer（Token）上，递归树结束。</p>
+<p>上面其实已经可以看到Antlr4规则的写法，下面介绍一部分比较重要的规则的写法。</p>
+<h4 id="2-2-2-替代标签"><a href="#2-2-2-替代标签" class="headerlink" title="2.2.2 替代标签"></a>2.2.2 替代标签</h4><p>首先，如2.2.1节的代码所示，stat可以有非常多的类型，例如变量定义、函数定义、if、while等，这些都没有进行区分，这样解析出来语法树时，会很不清晰，需要结合很多的标记完成具体语句的识别，这种情况下，我们可以结合替代标签完成区分，如下代码：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">stat</span><br><span class="line">: &#x27;;&#x27;</span><br><span class="line">| varlist &#x27;=&#x27; explist  #varListStat</span><br><span class="line">| functioncall  #functionCallStat</span><br><span class="line">| label  #labelStat</span><br><span class="line">| &#x27;break&#x27;  #breakStat</span><br><span class="line">| &#x27;goto&#x27; NAME  #gotoStat</span><br><span class="line">| &#x27;do&#x27; block &#x27;end&#x27;  #doStat</span><br><span class="line">| &#x27;while&#x27; exp &#x27;do&#x27; block &#x27;end&#x27;  #whileStat</span><br><span class="line">| &#x27;repeat&#x27; block &#x27;until&#x27; exp  #repeatStat</span><br><span class="line">| &#x27;if&#x27; exp &#x27;then&#x27; block (&#x27;elseif&#x27; exp &#x27;then&#x27; block)* (&#x27;else&#x27; block)? &#x27;end&#x27;  #ifStat</span><br><span class="line">| &#x27;for&#x27; NAME &#x27;=&#x27; exp &#x27;,&#x27; exp (&#x27;,&#x27; exp)? &#x27;do&#x27; block &#x27;end&#x27;  #forStat</span><br><span class="line">| &#x27;for&#x27; namelist &#x27;in&#x27; explist &#x27;do&#x27; block &#x27;end&#x27;  #forInStat</span><br><span class="line">| &#x27;function&#x27; funcname funcbody  #functionDefStat</span><br><span class="line">| &#x27;local&#x27; &#x27;function&#x27; NAME funcbody  #localFunctionDefStat</span><br><span class="line">| &#x27;local&#x27; attnamelist (&#x27;=&#x27; explist)?  #localVarListStat</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<p>通过在语句后面，添加 #替代标签，可以将语句转换为这些替代标签，从而加以区分。</p>
+<h4 id="2-2-3-操作符优先级处理"><a href="#2-2-3-操作符优先级处理" class="headerlink" title="2.2.3 操作符优先级处理"></a>2.2.3 操作符优先级处理</h4><p>默认情况下，ANTLR从左到右结合运算符，然而某些像指数群这样的运算符则是从右到左。可以使用选项assoc手动指定运算符记号上的相关性。如下面的操作：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">expr : expr &#x27;^&#x27;&lt;assoc=right&gt; expr</span><br></pre></td></tr></table></figure>
+
+<p>^ 表示指数运算，增加 assoc&#x3D;right，表示该运算符是右结合。</p>
+<p>实际上，Antlr4 已经对一些常用的操作符的优先级进行了处理，例如加减乘除等，这些就不需要再特殊处理。</p>
+<h4 id="2-2-4-隐藏通道"><a href="#2-2-4-隐藏通道" class="headerlink" title="2.2.4 隐藏通道"></a>2.2.4 隐藏通道</h4><p>很多信息，例如注释、空格等，是结果信息生成不需要处理的，但是我们又不适合直接丢弃，安全地忽略掉注释和空格的方法是把这些发送给语法分析器的记号放到一个“隐藏通道”中，语法分析器仅需要调协到单个通道即可。我们可以把任何我们想要的东西传递到其它通道中。在Lua.g4中，这类信息的处理如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">COMMENT</span><br><span class="line">: &#x27;--[&#x27; NESTED_STR &#x27;]&#x27; -&gt; channel(HIDDEN)</span><br><span class="line">;</span><br><span class="line">LINE_COMMENT</span><br><span class="line">: &#x27;--&#x27;</span><br><span class="line">(                                               // --</span><br><span class="line">| &#x27;[&#x27; &#x27;=&#x27;*                                      // --[==</span><br><span class="line">| &#x27;[&#x27; &#x27;=&#x27;* ~(&#x27;=&#x27;|&#x27;[&#x27;|&#x27;\r&#x27;|&#x27;\n&#x27;) ~(&#x27;\r&#x27;|&#x27;\n&#x27;)*   // --[==AA</span><br><span class="line">| ~(&#x27;[&#x27;|&#x27;\r&#x27;|&#x27;\n&#x27;) ~(&#x27;\r&#x27;|&#x27;\n&#x27;)*                // --AAA</span><br><span class="line">) (&#x27;\r\n&#x27;|&#x27;\r&#x27;|&#x27;\n&#x27;|EOF)</span><br><span class="line">-&gt; channel(HIDDEN)</span><br><span class="line">;</span><br><span class="line">WS</span><br><span class="line">: [ \t\u000C\r\n]+ -&gt; skip</span><br><span class="line">;</span><br><span class="line">SHEBANG</span><br><span class="line">: &#x27;#&#x27; &#x27;!&#x27; ~(&#x27;\n&#x27;|&#x27;\r&#x27;)* -&gt; channel(HIDDEN)</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<p>放到 channel(HIDDEN) 中的 Token，不会被语法解析阶段处理，但是可以通过Token遍历获取到。</p>
+<h4 id="2-2-5-常见词法结构"><a href="#2-2-5-常见词法结构" class="headerlink" title="2.2.5 常见词法结构"></a>2.2.5 常见词法结构</h4><p>Antlr4采用BNF范式，用’|’表示分支选项，’*’表示匹配前一个匹配项0次或者多次，’+’ 表示匹配前一个匹配项至少一次。下面介绍几种常见的词法举例（均来自Lua.g4文件）：</p>
+<ul>
+<li>注释信息</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">COMMENT</span><br><span class="line">: &#x27;--[&#x27; NESTED_STR &#x27;]&#x27; -&gt; channel(HIDDEN)</span><br><span class="line">;</span><br><span class="line">LINE_COMMENT</span><br><span class="line">: &#x27;--&#x27;</span><br><span class="line">(                                               // --</span><br><span class="line">| &#x27;[&#x27; &#x27;=&#x27;*                                      // --[==</span><br><span class="line">| &#x27;[&#x27; &#x27;=&#x27;* ~(&#x27;=&#x27;|&#x27;[&#x27;|&#x27;\r&#x27;|&#x27;\n&#x27;) ~(&#x27;\r&#x27;|&#x27;\n&#x27;)*   // --[==AA</span><br><span class="line">| ~(&#x27;[&#x27;|&#x27;\r&#x27;|&#x27;\n&#x27;) ~(&#x27;\r&#x27;|&#x27;\n&#x27;)*                // --AAA</span><br><span class="line">) (&#x27;\r\n&#x27;|&#x27;\r&#x27;|&#x27;\n&#x27;|EOF)</span><br><span class="line">-&gt; channel(HIDDEN)</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>数字</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">INT</span><br><span class="line">: Digit+</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">Digit</span><br><span class="line">: [0-9]</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>ID（命名）</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">NAME</span><br><span class="line">: [a-zA-Z_][a-zA-Z_0-9]*</span><br><span class="line">;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-基于IDEA调试Antlr4语法规则（文法可视化）"><a href="#3-基于IDEA调试Antlr4语法规则（文法可视化）" class="headerlink" title="3. 基于IDEA调试Antlr4语法规则（文法可视化）"></a>3. 基于IDEA调试Antlr4语法规则（文法可视化）</h2><p>如果要安装Antlr4，选择 File -&gt; Settings -&gt; Plugins，然后在搜索框搜索 Antlr安装即可，可以选择安装搜索出来的最新版本，下图是刚刚安装的ANTLR v4，版本是v1.15，支持最新的Antlr 4.9版本。IDEA安装Antlr.png</p>
+<p>基于IDEA调试Antlr4语法一般步骤：</p>
+<p><strong>(1) 创建一个调试工程，并创建一个g4文件</strong></p>
+<p>这里，我自己测试用Java开发，所以创建的是一个Maven工程，g4文件放在了src&#x2F;main&#x2F;resources 目录下，取名 Test.g4</p>
+<p><strong>（2）写一个简单的语法结构</strong></p>
+<p>这里我们参考写一个加减乘除操作的表达式，然后在赋值操作对应的Rule上右键，可选择测试：</p>
+<p>IDEA Antlr代码可视化1.png</p>
+<p>如上图，expr 表示的是一个乘法操作，所以我们如下测试：</p>
+<p>IDEA Antlr代码可视化2.png</p>
+<p>但是，如果改成一个加法操作，则无法识别，只能识别到第一个数字。</p>
+<p>IDEA Antlr代码可视化3.png</p>
+<p>这种情况下，就需要继续扩充 expr的定义，丰富不同的语法，来继续支持其他的语法，如下：</p>
+<p>IDEA Antlr代码可视化4.png</p>
+<p>还可以继续扩充其他类型的支持，这样一步步将整个语言的语法都支持完整。这里，我们形成的一个完整的格式如下（表示整形数字的加减乘除）：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">grammar Test;</span><br><span class="line"></span><br><span class="line">@header &#123;</span><br><span class="line">package zmj.test.antlr4.parser;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">stmt : expr;</span><br><span class="line"></span><br><span class="line">expr : expr NUL expr    # Mul</span><br><span class="line">| expr ADD expr    # Add</span><br><span class="line">| expr DIV expr    # Div</span><br><span class="line">| expr MIN expr    # Min</span><br><span class="line">| INT              # Int</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">NUL : &#x27;*&#x27;;</span><br><span class="line">ADD : &#x27;+&#x27;;</span><br><span class="line">DIV : &#x27;/&#x27;;</span><br><span class="line">MIN : &#x27;-&#x27;;</span><br><span class="line"></span><br><span class="line">INT : Digit+;</span><br><span class="line">Digit : [0-9];</span><br><span class="line"></span><br><span class="line">WS : [ \t\u000C\r\n]+ -&gt; skip;</span><br><span class="line"></span><br><span class="line">SHEBANG : &#x27;#&#x27; &#x27;!&#x27; ~(&#x27;\n&#x27;|&#x27;\r&#x27;)* -&gt; channel(HIDDEN);</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-Antlr4生成并遍历AST"><a href="#4-Antlr4生成并遍历AST" class="headerlink" title="4. Antlr4生成并遍历AST"></a>4. Antlr4生成并遍历AST</h2><h3 id="4-1-生成源码文件"><a href="#4-1-生成源码文件" class="headerlink" title="4.1 生成源码文件"></a>4.1 生成源码文件</h3><p>这一步介绍两种生成解析语法树的两种方法，供参考：</p>
+<ul>
+<li>Maven Antlr4插件自动生成（针对Java工程，也可以用于Gradle）<br>pom.xml设置Antlr4 Maven插件，可以通过执行 <code>mvn generate-sources</code>自动生成需要的代码（参考链接： <a href="https://www.antlr.org/api/maven-plugin/latest/antlr4-mojo.html%EF%BC%8C%E4%B8%BB%E8%A6%81%E7%9A%84%E6%84%8F%E4%B9%89%E5%9C%A8%E4%BA%8E%EF%BC%8C%E4%BB%A3%E7%A0%81%E5%85%A5%E5%BA%93%E7%9A%84%E6%97%B6%E5%80%99%EF%BC%8C%E4%B8%8D%E9%9C%80%E8%A6%81%E5%86%8D%E5%B0%86%E7%94%9F%E6%88%90%E7%9A%84%E8%BF%99%E4%BA%9B%E8%AF%AD%E6%B3%95%E6%96%87%E4%BB%B6%E5%85%A5%E5%BA%93%EF%BC%8C%E5%87%8F%E5%B0%91%E5%BA%93%E9%87%8C%E9%9D%A2%E7%9A%84%E4%BB%A3%E7%A0%81%E5%86%97%E4%BD%99%EF%BC%8C%E5%8F%AA%E5%8C%85%E5%90%AB%E8%87%AA%E5%B7%B1%E5%BC%80%E5%8F%91%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%B8%8D%E4%BC%9A%E6%9C%89%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E7%9A%84%E4%BB%A3%E7%A0%81%EF%BC%8C%E4%B9%9F%E4%B8%8D%E9%9C%80%E8%A6%81%E5%81%9Aclean">https://www.antlr.org/api/maven-plugin/latest/antlr4-mojo.html，主要的意义在于，代码入库的时候，不需要再将生成的这些语法文件入库，减少库里面的代码冗余，只包含自己开发的代码，不会有自动生成的代码，也不需要做clean</a> code整改），下面是一个示例：<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.antlr<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>antlr4-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>antlr<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">goal</span>&gt;</span>antlr4<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">phase</span>&gt;</span>generate-sources<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">sourceDirectory</span>&gt;</span>$&#123;basedir&#125;/src/main/resources<span class="tag">&lt;/<span class="name">sourceDirectory</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">outputDirectory</span>&gt;</span>$&#123;project.build.directory&#125;/generated-sources/antlr4/zmj/test/antlr4/parser<span class="tag">&lt;/<span class="name">outputDirectory</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">listener</span>&gt;</span>true<span class="tag">&lt;/<span class="name">listener</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">visitor</span>&gt;</span>true<span class="tag">&lt;/<span class="name">visitor</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">treatWarningsAsErrors</span>&gt;</span>true<span class="tag">&lt;/<span class="name">treatWarningsAsErrors</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>按照上面设置后，只需要执行 <code>mvn generate-sources</code> 即可在maven工程中自动生成代码。</p>
+<ul>
+<li>命令行方式<br>主要参考链接（<a href="https://www.antlr.org/download.html%EF%BC%89%EF%BC%8C%E6%9C%89%E6%AF%8F%E7%A7%8D%E8%AF%AD%E8%A8%80%E7%9A%84%E8%AF%AD%E6%B3%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E6%88%91%E4%BB%AC%E8%BF%99%E9%87%8C%E8%80%83%E8%99%91%E4%B8%8B%E8%BD%BDAntlr4%E5%AE%8C%E6%95%B4jar%EF%BC%9A">https://www.antlr.org/download.html），有每种语言的语法配置，我们这里考虑下载Antlr4完整jar：</a></li>
+</ul>
+<p>Antlr下载.png</p>
+<p>下载好后（antlr-4.9-complete.jar）,可以使用如下命令来生成需要的信息：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ java -jar antlr-4.9-complete.jar -Dlanguage=Python3 -visitor Test.g4</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以生成Python3 target的源码，支持的源码可以从上面链接查看，如果不希望生成Listener，可以添加参数 -no-listener</p>
+<h3 id="4-2-访问者模式遍历Antlr4语法树"><a href="#4-2-访问者模式遍历Antlr4语法树" class="headerlink" title="4.2 访问者模式遍历Antlr4语法树"></a>4.2 访问者模式遍历Antlr4语法树</h3><p>Antlr4在AST遍历时，支持两种设计模式：访问者设计模式 和 监听器模式。</p>
+<p>对于 访问者设计模式，我们需要自己定义对 AST 的访问（<a href="https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28%EF%BC%8C%E8%BF%99%E6%98%AF%E4%B8%80%E7%AF%87%E9%92%88%E5%AF%B9%E8%AE%BF%E9%97%AE%E8%80%85%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BB%8B%E7%BB%8D%EF%BC%8C%E5%A4%A7%E5%AE%B6%E5%8F%AF%E4%BB%A5%E5%8F%82%E8%80%83%EF%BC%89%E3%80%82%E4%B8%8B%E9%9D%A2%E7%9B%B4%E6%8E%A5%E9%80%9A%E8%BF%87%E4%BB%A3%E7%A0%81%E5%B1%95%E7%A4%BA%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F%E5%9C%A8Antlr4%E4%B8%AD%E4%BD%BF%E7%94%A8%EF%BC%88%E5%9F%BA%E4%BA%8E%E7%AC%AC3%E7%AB%A0%E7%9A%84%E4%BE%8B%E5%AD%90%EF%BC%89%EF%BC%9A">https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28，这是一篇针对访问者设计模式的介绍，大家可以参考）。下面直接通过代码展示访问者模式在Antlr4中使用（基于第3章的例子）：</a></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.antlr.v4.runtime.CharStream;</span><br><span class="line"><span class="keyword">import</span> org.antlr.v4.runtime.CharStreams;</span><br><span class="line"><span class="keyword">import</span> org.antlr.v4.runtime.CommonTokenStream;</span><br><span class="line"><span class="keyword">import</span> zmj.test.antlr4.parser.TestBaseVisitor;</span><br><span class="line"><span class="keyword">import</span> zmj.test.antlr4.parser.TestLexer;</span><br><span class="line"><span class="keyword">import</span> zmj.test.antlr4.parser.TestParser;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App</span> &#123;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"><span class="type">CharStream</span> <span class="variable">input</span> <span class="operator">=</span> CharStreams.fromString(<span class="string">&quot;12*2+12&quot;</span>);</span><br><span class="line">TestLexer lexer=<span class="keyword">new</span> <span class="title class_">TestLexer</span>(input);</span><br><span class="line"><span class="type">CommonTokenStream</span> <span class="variable">tokens</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CommonTokenStream</span>(lexer);</span><br><span class="line"><span class="type">TestParser</span> <span class="variable">parser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TestParser</span>(tokens);</span><br><span class="line">TestParser.<span class="type">ExprContext</span> <span class="variable">tree</span> <span class="operator">=</span> parser.expr();</span><br><span class="line"><span class="type">TestVisitor</span> <span class="variable">tv</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TestVisitor</span>();</span><br><span class="line">tv.visit(tree);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">TestVisitor</span> <span class="keyword">extends</span> <span class="title class_">TestBaseVisitor</span>&lt;Void&gt; &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> Void <span class="title function_">visitAdd</span><span class="params">(TestParser.AddContext ctx)</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;========= test add&quot;</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;first arg: &quot;</span> + ctx.expr(<span class="number">0</span>).getText());</span><br><span class="line">            System.out.println(<span class="string">&quot;second arg: &quot;</span> + ctx.expr(<span class="number">1</span>).getText());</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.visitAdd(ctx);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上，main方法中，解析出了表达式的AST结构，同时在源码中也定义了一个Visitor：TestVisitor，访问AddContext，并且打印该加表达式的前后两个表达式，上面例子的输出为：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">========= test add</span><br><span class="line">first arg: 12*2</span><br><span class="line">second arg: 12</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-监听器模式（观察者模式）"><a href="#4-2-监听器模式（观察者模式）" class="headerlink" title="4.2 监听器模式（观察者模式）"></a>4.2 监听器模式（观察者模式）</h3><p>对于监听器模式，就是通过监听某对象，如果该对象上有特定的事件发生，则触发该监听行为执行。比如有个监控（监听器），监控的是大门（事件对象），如果发生了闯门的行为（事件源），则进行报警（触发操作行为）。</p>
+<p>在Antlr4中，如果使用监听器模式，首先需要开发一个监听器，该监听器可以监听每个AST节点（例如表达式、语句等）的不同的行为（例如进入该节点、结束该节点）。在使用时，Antlr4会对生成的AST进行遍历（ParseTreeWalker），如果遍历到某个具体的节点，并且执行了特定行为，就会触发监听器的事件。</p>
+<p>监听器方法是没有返回值的（即返回类型是void）。因此需要一种额外的数据结构（可以通过Map或者栈）来存储当次的计算结果，供下一次计算调用。</p>
+<p>一般来说，面向程序静态分析时，都是使用访问者模式的，很少使用监听器模式（无法主动控制遍历AST的顺序，不方便在不同节点遍历之间传递数据），用法对咱们也不友好，所以本文不介绍监听器模式，如果有兴趣，可以自己搜索测试使用。</p>
+<h2 id="5-Antlr4词法解析和语法解析"><a href="#5-Antlr4词法解析和语法解析" class="headerlink" title="5. Antlr4词法解析和语法解析"></a>5. Antlr4词法解析和语法解析</h2><p>这部分实际上，算是Antlr4最基础的内容，但是放到最后一部分来讲，有特定的目的，就是探讨一下词法解析和语法解析的界限，以及Antlr4的结果的处理。</p>
+<h3 id="5-1-Antlr4执行阶段"><a href="#5-1-Antlr4执行阶段" class="headerlink" title="5.1 Antlr4执行阶段"></a>5.1 Antlr4执行阶段</h3><p>如前面的语法定义，分为Lexer和Parser，实际上表示了两个不同的阶段：</p>
+<p>词法分析阶段：对应于Lexer定义的词法规则，解析结果为一个一个的Token；<br>解析阶段：根据词法，构造出来一棵解析树或者语法树。<br>如下图所示：</p>
+<p>Antlr4执行步骤.png</p>
+<h3 id="5-2-词法解析和语法解析的调和"><a href="#5-2-词法解析和语法解析的调和" class="headerlink" title="5.2 词法解析和语法解析的调和"></a>5.2 词法解析和语法解析的调和</h3><p>首先，我们应该有个普遍的认知：语法解析相对于词法解析，会产生更多的开销，所以，应该尽量将某些可能的处理在词法解析阶段完成，减少语法解析阶段的开销，主要下面的这些例子：</p>
+<p>合并语言不关心的标记，例如，某些语言（例如js）不区分int、double，只有 number，那么在词法解析阶段，就不需要将int和double区分开，统一合并为一个number；<br>空格、注释等信息，对于语法解析并无大的帮助，可以在词法分析阶段剔除掉；<br>诸如标志符、关键字、字符串和数字这样的常用记号，均应该在词法解析时完成，而不要到语法解析阶段再进行。<br>但是，这样的操作在节省了语法分析的开销之外，其实对我们也产生了一些影响：</p>
+<p>虽然语言不区分类型，例如只有 number，没有 int 和 double 等，但是面向静态代码分析，我们可能需要知道确切的类型来帮助分析特定的缺陷；<br>虽然注释对代码帮助不大，但是我们有时候也需要解析注释的内容来进行分析，如果无法在语法解析的时候获取，那么就需要遍历Token，从而导致静态代码分析开销更大等；<br>…<br>这样的一些问题该如何处理呢？</p>
+<h3 id="5-3-解析树vs语法树"><a href="#5-3-解析树vs语法树" class="headerlink" title="5.3 解析树vs语法树"></a>5.3 解析树vs语法树</h3><p>大部分的资料中，都把Antlr4生成的树状结构，称为解析树或者是语法树，但是，如果我们细究的话，可能说成是解析树更加准确，因为Antlr4的结果，只是简单的文法解析，不能称之为语法树（语法树应该是能够体现出来语法特性的信息），如上面的那些问题，就很难在Antlr4生成的解析树上获取到。</p>
+<p>所以，现在很多工具，基于Antlr4进行封装，然后进行了更进一步地处理，从而获取到了更加丰富的语法树，例如CheckStyle。因此，如果通过Antlr4解析语言简单使用，可以直接基于Antlr4的结果开发，但是如果要进行更加深入的处理，就需要对Antlr4的结果进行更进一步的处理，以更符合我们的使用习惯（例如，Java Parser格式的Java的AST，Clang格式的C&#x2F;C++的AST），然后才能更好地在上面进行开发。</p>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+      </categories>
+      <tags>
+        <tag>Antlr4</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>用于静态代码分析的程序表示——AST获取</title>
     <url>/2022/10/25/program-representation-ast-gen/</url>
     <content><![CDATA[<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。</p>
@@ -61,6 +175,124 @@
       </categories>
       <tags>
         <tag>AST</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【转载】JavaParser应用介绍</title>
+    <url>/2022/10/25/program-representation-javaparser-intro/</url>
+    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96">https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96</a></p>
+<h2 id="0-Java-Parser-基本信息"><a href="#0-Java-Parser-基本信息" class="headerlink" title="0. Java Parser 基本信息"></a>0. Java Parser 基本信息</h2><p>Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。</p>
+<p>Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。</p>
+<span id="more"></span>
+
+<p>Java Parser 的组件架构（<a href="https://javaparser.org/code-style-architecture/%EF%BC%89%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%EF%BC%9A">https://javaparser.org/code-style-architecture/）如下图所示：</a></p>
+<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser.png"></p>
+<center>图 0-1 Java Parser 组件架构</center>
+
+<p>本文讨论 Java Parser 面向 Java 规范检查方向的一些内容，因此我们不关心 Java Parser 在修改 AST 和重新生成 Java 文件方面的作用，着重介绍在生成 AST、AST 遍历、解析、类型推断及应用。</p>
+<p>说明：本文中所有的代码的完成代码，可以参考<a href="https://gitee.com/maijun/javaparser-test/tree/master">https://gitee.com/maijun/javaparser-test/tree/master</a>(<font color="red">暂时下线，待优化上线</font>)。</p>
+<h2 id="1-Java-Parser-AST-生成及打印"><a href="#1-Java-Parser-AST-生成及打印" class="headerlink" title="1. Java Parser AST 生成及打印"></a>1. Java Parser AST 生成及打印</h2><h3 id="1-1-Java-Parser-生成-AST"><a href="#1-1-Java-Parser-生成-AST" class="headerlink" title="1.1 Java Parser 生成 AST"></a>1.1 Java Parser 生成 AST</h3><p>Java Parser 转换生成 AST，有很多方法，主要支持两大类方式：</p>
+<h4 id="1-输入为文件"><a href="#1-输入为文件" class="headerlink" title="1) 输入为文件"></a>1) 输入为文件</h4><p>输入为文件，即针对完整的文件为输入，生成整个文件的 AST（对于 Java 来说，如果是整个 Java 文件，AST 的根节点为 CompilationUnit），这种方式，可以完整保留源码的代码行信息，这样方便进行分析。对于文件为输入，即输入文件路径（多种写法，例如 String、File、Path、Resource 等，其实都是表示文件路径），同时可以指定文件的编码方式，下面的用例，指定的是 nio 的 Path 格式的路径。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 转换的是完整的Java文件</span></span><br><span class="line"><span class="type">File</span> <span class="variable">base</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">relativePath</span> <span class="operator">=</span> <span class="string">&quot;test-case/javaparser-testcase/src/main/java/zmj/test/thread/MyThread.java&quot;</span>;</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> base.getCanonicalPath() + File.separator + relativePath;</span><br><span class="line">ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(Paths.get(absolutePath));</span><br><span class="line">result.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-输入为代码片段"><a href="#2-输入为代码片段" class="headerlink" title="2) 输入为代码片段"></a>2) 输入为代码片段</h4><p>输入为代码片段时，一定要是一种标准的符合一定格式的能够识别为语句或者表达式的代码片段，例如 <code>int x</code> 是一个 VariableDeclarationExpr，<code>x = 3</code> 是一个 AssignExpr，但是，如果代码片段写成 <code>x + 3 = y</code>，则不符合基本的 Java 的语法。</p>
+<p>下面是一个基本的关于这种用法的例子（如果要看完整支持的功能，可以看 Java Parser 的 API 文档）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 2. 转换的为部分代码片段</span></span><br><span class="line">ParseResult&lt;VariableDeclarationExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseVariableDeclarationExpr(<span class="string">&quot;int x = 3&quot;</span>);</span><br><span class="line">System.out.println(exprResult.getResult().get());</span><br><span class="line">exprResult.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
+
+<p>事实上，我们可以将完整的 Java 文件内容都读到一个字符串里面，然后传递给 Java Parser，来获取 AST，即针对完整的 Java 文件，以代码片段的方式来解析获取 AST，这样也是可以的。但是我们不推荐这样做，因为直接传递文件，可以保留完整的代码行信息，但是传递的如果是代码片段，则代码行信息被丢失掉了。</p>
+<h3 id="1-2-Java-Parser-AST-打印"><a href="#1-2-Java-Parser-AST-打印" class="headerlink" title="1.2 Java Parser AST 打印"></a>1.2 Java Parser AST 打印</h3><p>Java Parser AST 打印有多种方式，当前支持三种打印方式：Yaml、XML 和 Graphiz 可以识别的 dot 的图片生成的格式。</p>
+<p>如下面的代码所示，我们针对一个简单的语句（<code>x = 3 + 4</code>），生成了 Yaml、XML 和 Graphiz dot 的输出：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AstPrinter</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        ParseResult&lt;AssignExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseExpression(<span class="string">&quot;x = 3 + 4&quot;</span>);</span><br><span class="line">        Optional&lt;AssignExpr&gt; expr = exprResult.getResult();</span><br><span class="line">        <span class="comment">// 1. Yaml格式输出打印</span></span><br><span class="line">        expr.ifPresent(YamlPrinter::print);</span><br><span class="line">        <span class="comment">// 2. XML格式输出打印</span></span><br><span class="line">        expr.ifPresent(XmlPrinter::print);</span><br><span class="line">        <span class="comment">// 3. dot打印(可以通过Graphiz dot命令，将输出生成为图片格式，例如 dot -Tpng ast.dot &gt; ast.png)</span></span><br><span class="line">        expr.ifPresent(e -&gt; System.out.println(<span class="keyword">new</span> <span class="title class_">DotPrinter</span>(<span class="literal">true</span>).output(e)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-Yaml-格式输出"><a href="#1-Yaml-格式输出" class="headerlink" title="1) Yaml 格式输出"></a>1) Yaml 格式输出</h4><p>输出的 Yaml 格式如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">root(Type=AssignExpr):</span></span><br><span class="line">    <span class="attr">operator:</span> <span class="string">&quot;ASSIGN&quot;</span></span><br><span class="line">    <span class="string">target(Type=NameExpr):</span></span><br><span class="line">        <span class="string">name(Type=SimpleName):</span></span><br><span class="line">        <span class="attr">identifier:</span> <span class="string">&quot;x&quot;</span></span><br><span class="line">    <span class="string">value(Type=BinaryExpr):</span></span><br><span class="line">        <span class="attr">operator:</span> <span class="string">&quot;PLUS&quot;</span></span><br><span class="line">        <span class="string">left(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">        <span class="string">right(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;4&quot;</span></span><br><span class="line"><span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-XML-格式输出"><a href="#2-XML-格式输出" class="headerlink" title="2) XML 格式输出"></a>2) XML 格式输出</h4><p>输出的 XML 格式如下（原始输出是只有一个字符串，这里我简单进行了处理，添加了换行和缩进）：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">root</span> <span class="attr">type</span>=<span class="string">&#x27;AssignExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;ASSIGN&#x27;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">target</span> <span class="attr">type</span>=<span class="string">&#x27;NameExpr&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">name</span> <span class="attr">type</span>=<span class="string">&#x27;SimpleName&#x27;</span> <span class="attr">identifier</span>=<span class="string">&#x27;x&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">value</span> <span class="attr">type</span>=<span class="string">&#x27;BinaryExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;PLUS&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">left</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;3&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">left</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">right</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;4&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">right</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-Graphiz-dot-输出"><a href="#3-Graphiz-dot-输出" class="headerlink" title="3) Graphiz dot 输出"></a>3) Graphiz dot 输出</h4><p>首先打印的内容如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">digraph &#123;</span><br><span class="line">n0 [label=&quot;root (AssignExpr)&quot;];</span><br><span class="line">n1 [label=&quot;operator=&#x27;ASSIGN&#x27;&quot;];</span><br><span class="line">n0 -&gt; n1;</span><br><span class="line">n2 [label=&quot;target (NameExpr)&quot;];</span><br><span class="line">n0 -&gt; n2;</span><br><span class="line">n3 [label=&quot;name (SimpleName)&quot;];</span><br><span class="line">n2 -&gt; n3;</span><br><span class="line">n4 [label=&quot;identifier=&#x27;x&#x27;&quot;];</span><br><span class="line">n3 -&gt; n4;</span><br><span class="line">n5 [label=&quot;value (BinaryExpr)&quot;];</span><br><span class="line">n0 -&gt; n5;</span><br><span class="line">n6 [label=&quot;operator=&#x27;PLUS&#x27;&quot;];</span><br><span class="line">n5 -&gt; n6;</span><br><span class="line">n7 [label=&quot;left (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n7;</span><br><span class="line">n8 [label=&quot;value=&#x27;3&#x27;&quot;];</span><br><span class="line">n7 -&gt; n8;</span><br><span class="line">n9 [label=&quot;right (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n9;</span><br><span class="line">n10 [label=&quot;value=&#x27;4&#x27;&quot;];</span><br><span class="line">n9 -&gt; n10;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将上面的内容写入 ast.dot 文件中，使用命令 dot -Tpng ast.dot &gt; ast.png 即可得到一个图片，如下：</p>
+<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser-dot.png"></p>
+<p>差不多算是一个 AST 的树状结构的一个样子了。</p>
+<h2 id="2-Java-Parser-AST-遍历"><a href="#2-Java-Parser-AST-遍历" class="headerlink" title="2. Java Parser AST 遍历"></a>2. Java Parser AST 遍历</h2><p>在 Java Parser 中，AST 的遍历采用的是访问者模式，在访问者模式的基础上，增加了一个简单的包装器（这里就不再介绍什么是访问者模式和包装器模式了，在另外一篇文章里面，有关于访问者模式的详细介绍）。下面代码中定义了两个非常简单的 visitor，其中一个访问函数调用表达式，打印所有的函数调用的代码，第二个访问所有的函数定义信息，将当前类中定义的函数都打印出来。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TestVisitor</span> <span class="keyword">extends</span> <span class="title class_">GenericVisitorAdapter</span>&lt;Void, Void&gt; &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodCallExpr n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function call: &quot;</span> + n.toString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodDeclaration n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function declaration: &quot;</span> + n.getNameAsString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：一个非常重要的地方，每个 visit 方法写完，都需要调用 <code>super.visit(n,arg)</code>; 因为在基类是一个包装器，实现了节点的遍历，如果不调用，当前节点处理完，程序就结束了。</p>
+<h2 id="3-Java-Parser-类型推断"><a href="#3-Java-Parser-类型推断" class="headerlink" title="3. Java Parser 类型推断"></a>3. Java Parser 类型推断</h2><h4 id="3-1-Symbol-Solver"><a href="#3-1-Symbol-Solver" class="headerlink" title="3.1 Symbol Solver"></a>3.1 Symbol Solver</h4><p>在 Java 中，所有的 Name 等都被称为 Symbol，包括变量、类型、方法等。一般提到类型推断，就是对 Symbol 的操作。所以我们这里提一下 Symbol Solver，因为所有的 Type Solver 都是针对特定的 Symbol 工作的（即 TypeSolver 需要封装在 SymbolSolver 中才能工作）。</p>
+<h4 id="3-2-Type-Solver"><a href="#3-2-Type-Solver" class="headerlink" title="3.2 Type Solver"></a>3.2 Type Solver</h4><p>Java Parser 类型推断有多种类型推断方式，如下表：</p>
+<ul>
+<li>AarTypeSolver: 在 Android aar 文件中查找特定的类型;</li>
+<li>ClassLoaderTypeSolver: 针对自定义的 ClassLoader 使用，可以处理由该 ClassLoader 加载的类，这种类型在静态代码分析中很少用到;</li>
+<li>CombinedTypeSolver: 可以封装多个 Type Solver 一起使用</li>
+<li>JarTypeSolver: 在 Jar 文件中，查找特定的类型</li>
+<li>JavaParserTypeSolver: 在源码中查找特定的类型，只需要传递源码根路径即可</li>
+<li>MemoryTypeSolver: 一般不需要使用，可以在测试中使用</li>
+<li>ReflectionTypeSolver: 用来处理应用 classpath 里面的类，一般用于处理 JRE 中的类</li>
+</ul>
+<p>下面介绍一个简单的例子（这个是一个简单的 maven 工程，但是为了测试 jar 的依赖，我先收集所有依赖的 jar 到项目下面的一个路径下，执行的命令为：<code>mvn dependency:copy-dependencies -DoutputDirectory=lib</code>）。</p>
+<p>这一个普通的 Java 应用，需要处理的类型有三个来源：① 当前自己工程中定义；② 当前工程的第三方依赖；③ JRE 中的基本类型。对应上面的 JavaParserTypeSolver，JarTypeSolver 和 ReflectionTypeSolver，组合成一个 CombinedTypeSolver，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> CombinedTypeSolver <span class="title function_">generateTypeSolver</span><span class="params">(String sourcePath, String libPath)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">CombinedTypeSolver</span> <span class="variable">solver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CombinedTypeSolver</span>();</span><br><span class="line">    <span class="comment">// 1. JavaParserTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">JavaParserTypeSolver</span>(sourcePath));</span><br><span class="line">    <span class="comment">// 2. JarTypeSolver</span></span><br><span class="line">    <span class="type">FindFileVisitor</span> <span class="variable">findJarVisitor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FindFileVisitor</span>(<span class="string">&quot;.jar&quot;</span>);</span><br><span class="line">    Files.walkFileTree(Paths.get(libPath), findJarVisitor);</span><br><span class="line">    <span class="keyword">for</span> (String name : findJarVisitor.getFileNameList()) &#123;</span><br><span class="line">        solver.add(<span class="keyword">new</span> <span class="title class_">JarTypeSolver</span>(name));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 3. ReflectionTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">ReflectionTypeSolver</span>());</span><br><span class="line">    <span class="keyword">return</span> solver;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后构造的 TypeSolver 传递给 JavaParser：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">TypeSolver</span> <span class="variable">typeSolver</span> <span class="operator">=</span> generateTypeSolver(base.getCanonicalPath() + File.separator + sourcePath,</span><br><span class="line">                            base.getCanonicalPath() + File.separator + libPath);</span><br><span class="line"><span class="type">JavaSymbolSolver</span> <span class="variable">symbolSolver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaSymbolSolver</span>(typeSolver);</span><br><span class="line"><span class="type">ParserConfiguration</span> <span class="variable">configuration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ParserConfiguration</span>();</span><br><span class="line">configuration.setSymbolResolver(symbolSolver);</span><br><span class="line"><span class="type">JavaParser</span> <span class="variable">parser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaParser</span>(configuration);</span><br></pre></td></tr></table></figure>
+
+<p>下面介绍三类主要的类型处理内容：</p>
+<ul>
+<li>对变量（表达式）类型的推断</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析变量的类型定义</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve variable type&quot;</span>);</span><br><span class="line">mce.getScope().ifPresent(expression -&gt; &#123;</span><br><span class="line">    <span class="type">ResolvedType</span> <span class="variable">resolvedType</span> <span class="operator">=</span> expression.calculateResolvedType();</span><br><span class="line">    System.out.println(expression.toString() + <span class="string">&quot; is a: &quot;</span> + resolvedType);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>用例的部分结果输出：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">System.out is a: ReferenceType&#123;java.io.PrintStream, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">m is a: ReferenceType&#123;zmj.test.thread.MyThread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">HashBasedTable is a: ReferenceType&#123;com.google.common.collect.HashBasedTable, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.HashBasedTable.V=TypeVariable &#123;JavassistTypeParameter&#123;V&#125;&#125;, com.google.common.collect.HashBasedTable.R=TypeVariable &#123;JavassistTypeParameter&#123;R&#125;&#125;, com.google.common.collect.HashBasedTable.C=TypeVariable &#123;JavassistTypeParameter&#123;C&#125;&#125;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">tt is a: ReferenceType&#123;com.google.common.collect.Table, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.Table.C=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.V=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.R=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上，可以计算诸如表达式（System.out）、变量（m，tt）、静态类（HashBasedTable）等的类型，而且支持第三方库的类型推断（HashBasedTable 为 google guava 库中的类型）。</p>
+<ul>
+<li>对函数签名的推断</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析函数调用的函数声明</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve method declaration&quot;</span>);</span><br><span class="line"><span class="type">JavaParserFacade</span> <span class="variable">javaParserFacade</span> <span class="operator">=</span> JavaParserFacade.get(typeSolver);</span><br><span class="line">SymbolReference&lt;ResolvedMethodDeclaration&gt; resolvedMethodDeclarationSymbolReference = javaParserFacade.solve(mce);</span><br><span class="line">System.out.println(<span class="string">&quot;is resolved: &quot;</span> + resolvedMethodDeclarationSymbolReference.isSolved());</span><br><span class="line">System.out.println(<span class="string">&quot;resolved type&quot;</span> + resolvedMethodDeclarationSymbolReference.getCorrespondingDeclaration());</span><br></pre></td></tr></table></figure>
+
+<p>如上，为了对函数签名进行推断，需要先构造出来一个 JavaParserFacade 对象，也是通过 typeSolver 构造出来的。上面的部分输出如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public void java.io.PrintStream.println(java.lang.String)&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public synchronized void java.lang.Thread.start()&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@6c8156fd[public static create ()Lcom/google/common/collect/HashBasedTable;]&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@f9f9cbbc[public abstract put (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上所示，对函数签名推断得非常准确，包括静态方法和实例方法，抽象、函数形参类型、返回值类型、函数所在的类等，都推断得非常准确。</p>
+<ul>
+<li>对类继承关系推断</li>
+</ul>
+<p>如下的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析类的继承关系</span></span><br><span class="line">System.out.println(<span class="string">&quot;---- resolve class extend relation&quot;</span>);</span><br><span class="line">cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cid -&gt; &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;current class: &quot;</span> + cid.getFullyQualifiedName().get());</span><br><span class="line">    NodeList&lt;ClassOrInterfaceType&gt; superTypes = cid.getExtendedTypes();</span><br><span class="line">    superTypes.forEach(type -&gt; System.out.println(<span class="string">&quot;super class: &quot;</span> + type.resolve()));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.App</span><br><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.thread.MyThread</span><br><span class="line">super class: ReferenceType&#123;java.lang.Thread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当前只定义了两个类，一个是 App，没有定义父类（直接就是 Object），没有打印，MyThread 是一个线程，获取到了父类的类型。</p>
+<h2 id="4-Java-Parser-简单应用"><a href="#4-Java-Parser-简单应用" class="headerlink" title="4. Java Parser 简单应用"></a>4. Java Parser 简单应用</h2><h3 id="4-1-源码间依赖关系分析"><a href="#4-1-源码间依赖关系分析" class="headerlink" title="4.1 源码间依赖关系分析"></a>4.1 源码间依赖关系分析</h3><p>如第 3.2 节中介绍的例子，可以非常方便地基于类型推断获取如下信息：</p>
+<ul>
+<li>当前类的父类或者父接口，并递归获取所有的父类和父接口；</li>
+<li>获取当前所调用函数的 signature（函数签名，包含可以唯一识别一个方法的所有信息，例如所在的类、名字、形参类型列表、返回值类型），从而拿到函数调用关系；</li>
+</ul>
+<p>另外，再结合源码文件和 Java 类定义的对应关系，可以很方便地构造出工程的 CG 图，识别出源码之间的依赖关系分析。</p>
+<h3 id="4-2-Java-代码度量"><a href="#4-2-Java-代码度量" class="headerlink" title="4.2 Java 代码度量"></a>4.2 Java 代码度量</h3><p>实际上，基于 Java Parser 获得的 AST 信息，辅助类型推断特性，可以实现针对源代码的各种度量内容。可以参考<a href="https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508%EF%BC%8C">https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508，</a> 查看常见的代码度量项。针对其中 3.1 所列出的所有的项都可以度量。</p>
+<p>常见的一些度量项：</p>
+<ul>
+<li><p>针对函数：圈复杂度、代码深度、各类代码行信息、调用函数数量、被调用次数、其他诸如入参个数…；</p>
+</li>
+<li><p>针对文件：总代码行、空行、注释行、非空非注释行、代码注释密度…；</p>
+</li>
+<li><p>针对工程：文件总数、代码行总数、平均代码行…</p>
+</li>
+</ul>
+<p>基于 Java Parser 可以很好地进行实现，而且大部分都不需要完整的依赖信息，可以方便地进行度量。</p>
+<h3 id="4-3-Java-规范支持检查"><a href="#4-3-Java-规范支持检查" class="headerlink" title="4.3 Java 规范支持检查"></a>4.3 Java 规范支持检查</h3><p>当前，针对各类规范支持，可以在不同的层面上进行支持，例如直接对源码检查、对解析得到的 Token 进行检查、对 AST 进行检查、在 CFG 和 CG 上进行数据流检查和各种形式化检查等。</p>
+<p>基于 Java Parser，可以实现在 AST 及源码（可以直接读取源码信息）、Token（从 AST 的节点可以获取当前 AST Node 中的所有的 Token）相结合的所有检查。</p>
+<p>例如，PMD 主要是在 AST 上进行的检查，CheckStyle 主要是在 Token 和 AST 上进行的检查，结合类型推断的支持，Java Parser 可以实现比 PMD 和 CheckStyle 更精确的检查。</p>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+      </categories>
+      <tags>
+        <tag>JavaParser</tag>
       </tags>
   </entry>
   <entry>
@@ -193,121 +425,51 @@
       </tags>
   </entry>
   <entry>
-    <title>【转载】JavaParser应用介绍</title>
-    <url>/2022/10/25/program-representation-javaparser-intro/</url>
-    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96">https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96</a></p>
-<h2 id="0-Java-Parser-基本信息"><a href="#0-Java-Parser-基本信息" class="headerlink" title="0. Java Parser 基本信息"></a>0. Java Parser 基本信息</h2><p>Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。</p>
-<p>Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。</p>
+    <title>用于静态代码分析的程序表示——概述</title>
+    <url>/2022/10/24/program-representation/</url>
+    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
+<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
 <span id="more"></span>
 
-<p>Java Parser 的组件架构（<a href="https://javaparser.org/code-style-architecture/%EF%BC%89%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%EF%BC%9A">https://javaparser.org/code-style-architecture/）如下图所示：</a></p>
-<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser.png"></p>
-<center>图 0-1 Java Parser 组件架构</center>
-
-<p>本文讨论 Java Parser 面向 Java 规范检查方向的一些内容，因此我们不关心 Java Parser 在修改 AST 和重新生成 Java 文件方面的作用，着重介绍在生成 AST、AST 遍历、解析、类型推断及应用。</p>
-<p>说明：本文中所有的代码的完成代码，可以参考<a href="https://gitee.com/maijun/javaparser-test/tree/master">https://gitee.com/maijun/javaparser-test/tree/master</a>(<font color="red">暂时下线，待优化上线</font>)。</p>
-<h2 id="1-Java-Parser-AST-生成及打印"><a href="#1-Java-Parser-AST-生成及打印" class="headerlink" title="1. Java Parser AST 生成及打印"></a>1. Java Parser AST 生成及打印</h2><h3 id="1-1-Java-Parser-生成-AST"><a href="#1-1-Java-Parser-生成-AST" class="headerlink" title="1.1 Java Parser 生成 AST"></a>1.1 Java Parser 生成 AST</h3><p>Java Parser 转换生成 AST，有很多方法，主要支持两大类方式：</p>
-<h4 id="1-输入为文件"><a href="#1-输入为文件" class="headerlink" title="1) 输入为文件"></a>1) 输入为文件</h4><p>输入为文件，即针对完整的文件为输入，生成整个文件的 AST（对于 Java 来说，如果是整个 Java 文件，AST 的根节点为 CompilationUnit），这种方式，可以完整保留源码的代码行信息，这样方便进行分析。对于文件为输入，即输入文件路径（多种写法，例如 String、File、Path、Resource 等，其实都是表示文件路径），同时可以指定文件的编码方式，下面的用例，指定的是 nio 的 Path 格式的路径。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 转换的是完整的Java文件</span></span><br><span class="line"><span class="type">File</span> <span class="variable">base</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">relativePath</span> <span class="operator">=</span> <span class="string">&quot;test-case/javaparser-testcase/src/main/java/zmj/test/thread/MyThread.java&quot;</span>;</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> base.getCanonicalPath() + File.separator + relativePath;</span><br><span class="line">ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(Paths.get(absolutePath));</span><br><span class="line">result.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-输入为代码片段"><a href="#2-输入为代码片段" class="headerlink" title="2) 输入为代码片段"></a>2) 输入为代码片段</h4><p>输入为代码片段时，一定要是一种标准的符合一定格式的能够识别为语句或者表达式的代码片段，例如 <code>int x</code> 是一个 VariableDeclarationExpr，<code>x = 3</code> 是一个 AssignExpr，但是，如果代码片段写成 <code>x + 3 = y</code>，则不符合基本的 Java 的语法。</p>
-<p>下面是一个基本的关于这种用法的例子（如果要看完整支持的功能，可以看 Java Parser 的 API 文档）。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 2. 转换的为部分代码片段</span></span><br><span class="line">ParseResult&lt;VariableDeclarationExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseVariableDeclarationExpr(<span class="string">&quot;int x = 3&quot;</span>);</span><br><span class="line">System.out.println(exprResult.getResult().get());</span><br><span class="line">exprResult.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
-
-<p>事实上，我们可以将完整的 Java 文件内容都读到一个字符串里面，然后传递给 Java Parser，来获取 AST，即针对完整的 Java 文件，以代码片段的方式来解析获取 AST，这样也是可以的。但是我们不推荐这样做，因为直接传递文件，可以保留完整的代码行信息，但是传递的如果是代码片段，则代码行信息被丢失掉了。</p>
-<h3 id="1-2-Java-Parser-AST-打印"><a href="#1-2-Java-Parser-AST-打印" class="headerlink" title="1.2 Java Parser AST 打印"></a>1.2 Java Parser AST 打印</h3><p>Java Parser AST 打印有多种方式，当前支持三种打印方式：Yaml、XML 和 Graphiz 可以识别的 dot 的图片生成的格式。</p>
-<p>如下面的代码所示，我们针对一个简单的语句（<code>x = 3 + 4</code>），生成了 Yaml、XML 和 Graphiz dot 的输出：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AstPrinter</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        ParseResult&lt;AssignExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseExpression(<span class="string">&quot;x = 3 + 4&quot;</span>);</span><br><span class="line">        Optional&lt;AssignExpr&gt; expr = exprResult.getResult();</span><br><span class="line">        <span class="comment">// 1. Yaml格式输出打印</span></span><br><span class="line">        expr.ifPresent(YamlPrinter::print);</span><br><span class="line">        <span class="comment">// 2. XML格式输出打印</span></span><br><span class="line">        expr.ifPresent(XmlPrinter::print);</span><br><span class="line">        <span class="comment">// 3. dot打印(可以通过Graphiz dot命令，将输出生成为图片格式，例如 dot -Tpng ast.dot &gt; ast.png)</span></span><br><span class="line">        expr.ifPresent(e -&gt; System.out.println(<span class="keyword">new</span> <span class="title class_">DotPrinter</span>(<span class="literal">true</span>).output(e)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="1-Yaml-格式输出"><a href="#1-Yaml-格式输出" class="headerlink" title="1) Yaml 格式输出"></a>1) Yaml 格式输出</h4><p>输出的 Yaml 格式如下：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">root(Type=AssignExpr):</span></span><br><span class="line">    <span class="attr">operator:</span> <span class="string">&quot;ASSIGN&quot;</span></span><br><span class="line">    <span class="string">target(Type=NameExpr):</span></span><br><span class="line">        <span class="string">name(Type=SimpleName):</span></span><br><span class="line">        <span class="attr">identifier:</span> <span class="string">&quot;x&quot;</span></span><br><span class="line">    <span class="string">value(Type=BinaryExpr):</span></span><br><span class="line">        <span class="attr">operator:</span> <span class="string">&quot;PLUS&quot;</span></span><br><span class="line">        <span class="string">left(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">        <span class="string">right(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;4&quot;</span></span><br><span class="line"><span class="string">...</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="2-XML-格式输出"><a href="#2-XML-格式输出" class="headerlink" title="2) XML 格式输出"></a>2) XML 格式输出</h4><p>输出的 XML 格式如下（原始输出是只有一个字符串，这里我简单进行了处理，添加了换行和缩进）：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">root</span> <span class="attr">type</span>=<span class="string">&#x27;AssignExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;ASSIGN&#x27;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">target</span> <span class="attr">type</span>=<span class="string">&#x27;NameExpr&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">name</span> <span class="attr">type</span>=<span class="string">&#x27;SimpleName&#x27;</span> <span class="attr">identifier</span>=<span class="string">&#x27;x&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">value</span> <span class="attr">type</span>=<span class="string">&#x27;BinaryExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;PLUS&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">left</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;3&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">left</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">right</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;4&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">right</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="3-Graphiz-dot-输出"><a href="#3-Graphiz-dot-输出" class="headerlink" title="3) Graphiz dot 输出"></a>3) Graphiz dot 输出</h4><p>首先打印的内容如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">digraph &#123;</span><br><span class="line">n0 [label=&quot;root (AssignExpr)&quot;];</span><br><span class="line">n1 [label=&quot;operator=&#x27;ASSIGN&#x27;&quot;];</span><br><span class="line">n0 -&gt; n1;</span><br><span class="line">n2 [label=&quot;target (NameExpr)&quot;];</span><br><span class="line">n0 -&gt; n2;</span><br><span class="line">n3 [label=&quot;name (SimpleName)&quot;];</span><br><span class="line">n2 -&gt; n3;</span><br><span class="line">n4 [label=&quot;identifier=&#x27;x&#x27;&quot;];</span><br><span class="line">n3 -&gt; n4;</span><br><span class="line">n5 [label=&quot;value (BinaryExpr)&quot;];</span><br><span class="line">n0 -&gt; n5;</span><br><span class="line">n6 [label=&quot;operator=&#x27;PLUS&#x27;&quot;];</span><br><span class="line">n5 -&gt; n6;</span><br><span class="line">n7 [label=&quot;left (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n7;</span><br><span class="line">n8 [label=&quot;value=&#x27;3&#x27;&quot;];</span><br><span class="line">n7 -&gt; n8;</span><br><span class="line">n9 [label=&quot;right (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n9;</span><br><span class="line">n10 [label=&quot;value=&#x27;4&#x27;&quot;];</span><br><span class="line">n9 -&gt; n10;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>将上面的内容写入 ast.dot 文件中，使用命令 dot -Tpng ast.dot &gt; ast.png 即可得到一个图片，如下：</p>
-<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser-dot.png"></p>
-<p>差不多算是一个 AST 的树状结构的一个样子了。</p>
-<h2 id="2-Java-Parser-AST-遍历"><a href="#2-Java-Parser-AST-遍历" class="headerlink" title="2. Java Parser AST 遍历"></a>2. Java Parser AST 遍历</h2><p>在 Java Parser 中，AST 的遍历采用的是访问者模式，在访问者模式的基础上，增加了一个简单的包装器（这里就不再介绍什么是访问者模式和包装器模式了，在另外一篇文章里面，有关于访问者模式的详细介绍）。下面代码中定义了两个非常简单的 visitor，其中一个访问函数调用表达式，打印所有的函数调用的代码，第二个访问所有的函数定义信息，将当前类中定义的函数都打印出来。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TestVisitor</span> <span class="keyword">extends</span> <span class="title class_">GenericVisitorAdapter</span>&lt;Void, Void&gt; &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodCallExpr n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function call: &quot;</span> + n.toString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodDeclaration n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function declaration: &quot;</span> + n.getNameAsString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意：一个非常重要的地方，每个 visit 方法写完，都需要调用 <code>super.visit(n,arg)</code>; 因为在基类是一个包装器，实现了节点的遍历，如果不调用，当前节点处理完，程序就结束了。</p>
-<h2 id="3-Java-Parser-类型推断"><a href="#3-Java-Parser-类型推断" class="headerlink" title="3. Java Parser 类型推断"></a>3. Java Parser 类型推断</h2><h4 id="3-1-Symbol-Solver"><a href="#3-1-Symbol-Solver" class="headerlink" title="3.1 Symbol Solver"></a>3.1 Symbol Solver</h4><p>在 Java 中，所有的 Name 等都被称为 Symbol，包括变量、类型、方法等。一般提到类型推断，就是对 Symbol 的操作。所以我们这里提一下 Symbol Solver，因为所有的 Type Solver 都是针对特定的 Symbol 工作的（即 TypeSolver 需要封装在 SymbolSolver 中才能工作）。</p>
-<h4 id="3-2-Type-Solver"><a href="#3-2-Type-Solver" class="headerlink" title="3.2 Type Solver"></a>3.2 Type Solver</h4><p>Java Parser 类型推断有多种类型推断方式，如下表：</p>
+<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
+<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
+<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
+<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
+<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
+<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
+<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
+<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
+<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
+<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
 <ul>
-<li>AarTypeSolver: 在 Android aar 文件中查找特定的类型;</li>
-<li>ClassLoaderTypeSolver: 针对自定义的 ClassLoader 使用，可以处理由该 ClassLoader 加载的类，这种类型在静态代码分析中很少用到;</li>
-<li>CombinedTypeSolver: 可以封装多个 Type Solver 一起使用</li>
-<li>JarTypeSolver: 在 Jar 文件中，查找特定的类型</li>
-<li>JavaParserTypeSolver: 在源码中查找特定的类型，只需要传递源码根路径即可</li>
-<li>MemoryTypeSolver: 一般不需要使用，可以在测试中使用</li>
-<li>ReflectionTypeSolver: 用来处理应用 classpath 里面的类，一般用于处理 JRE 中的类</li>
+<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
+<li>AST 的生成方式和获取，请参考 <a href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">用于静态代码分析的程序表示——AST获取</a>。</li>
+<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
 </ul>
-<p>下面介绍一个简单的例子（这个是一个简单的 maven 工程，但是为了测试 jar 的依赖，我先收集所有依赖的 jar 到项目下面的一个路径下，执行的命令为：<code>mvn dependency:copy-dependencies -DoutputDirectory=lib</code>）。</p>
-<p>这一个普通的 Java 应用，需要处理的类型有三个来源：① 当前自己工程中定义；② 当前工程的第三方依赖；③ JRE 中的基本类型。对应上面的 JavaParserTypeSolver，JarTypeSolver 和 ReflectionTypeSolver，组合成一个 CombinedTypeSolver，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> CombinedTypeSolver <span class="title function_">generateTypeSolver</span><span class="params">(String sourcePath, String libPath)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">CombinedTypeSolver</span> <span class="variable">solver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CombinedTypeSolver</span>();</span><br><span class="line">    <span class="comment">// 1. JavaParserTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">JavaParserTypeSolver</span>(sourcePath));</span><br><span class="line">    <span class="comment">// 2. JarTypeSolver</span></span><br><span class="line">    <span class="type">FindFileVisitor</span> <span class="variable">findJarVisitor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FindFileVisitor</span>(<span class="string">&quot;.jar&quot;</span>);</span><br><span class="line">    Files.walkFileTree(Paths.get(libPath), findJarVisitor);</span><br><span class="line">    <span class="keyword">for</span> (String name : findJarVisitor.getFileNameList()) &#123;</span><br><span class="line">        solver.add(<span class="keyword">new</span> <span class="title class_">JarTypeSolver</span>(name));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 3. ReflectionTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">ReflectionTypeSolver</span>());</span><br><span class="line">    <span class="keyword">return</span> solver;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后构造的 TypeSolver 传递给 JavaParser：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">TypeSolver</span> <span class="variable">typeSolver</span> <span class="operator">=</span> generateTypeSolver(base.getCanonicalPath() + File.separator + sourcePath,</span><br><span class="line">                            base.getCanonicalPath() + File.separator + libPath);</span><br><span class="line"><span class="type">JavaSymbolSolver</span> <span class="variable">symbolSolver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaSymbolSolver</span>(typeSolver);</span><br><span class="line"><span class="type">ParserConfiguration</span> <span class="variable">configuration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ParserConfiguration</span>();</span><br><span class="line">configuration.setSymbolResolver(symbolSolver);</span><br><span class="line"><span class="type">JavaParser</span> <span class="variable">parser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaParser</span>(configuration);</span><br></pre></td></tr></table></figure>
-
-<p>下面介绍三类主要的类型处理内容：</p>
+<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
 <ul>
-<li>对变量（表达式）类型的推断</li>
+<li>涉及到这两个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
+<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
 </ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析变量的类型定义</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve variable type&quot;</span>);</span><br><span class="line">mce.getScope().ifPresent(expression -&gt; &#123;</span><br><span class="line">    <span class="type">ResolvedType</span> <span class="variable">resolvedType</span> <span class="operator">=</span> expression.calculateResolvedType();</span><br><span class="line">    System.out.println(expression.toString() + <span class="string">&quot; is a: &quot;</span> + resolvedType);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>用例的部分结果输出：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">System.out is a: ReferenceType&#123;java.io.PrintStream, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">m is a: ReferenceType&#123;zmj.test.thread.MyThread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">HashBasedTable is a: ReferenceType&#123;com.google.common.collect.HashBasedTable, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.HashBasedTable.V=TypeVariable &#123;JavassistTypeParameter&#123;V&#125;&#125;, com.google.common.collect.HashBasedTable.R=TypeVariable &#123;JavassistTypeParameter&#123;R&#125;&#125;, com.google.common.collect.HashBasedTable.C=TypeVariable &#123;JavassistTypeParameter&#123;C&#125;&#125;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">tt is a: ReferenceType&#123;com.google.common.collect.Table, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.Table.C=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.V=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.R=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如上，可以计算诸如表达式（System.out）、变量（m，tt）、静态类（HashBasedTable）等的类型，而且支持第三方库的类型推断（HashBasedTable 为 google guava 库中的类型）。</p>
-<ul>
-<li>对函数签名的推断</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析函数调用的函数声明</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve method declaration&quot;</span>);</span><br><span class="line"><span class="type">JavaParserFacade</span> <span class="variable">javaParserFacade</span> <span class="operator">=</span> JavaParserFacade.get(typeSolver);</span><br><span class="line">SymbolReference&lt;ResolvedMethodDeclaration&gt; resolvedMethodDeclarationSymbolReference = javaParserFacade.solve(mce);</span><br><span class="line">System.out.println(<span class="string">&quot;is resolved: &quot;</span> + resolvedMethodDeclarationSymbolReference.isSolved());</span><br><span class="line">System.out.println(<span class="string">&quot;resolved type&quot;</span> + resolvedMethodDeclarationSymbolReference.getCorrespondingDeclaration());</span><br></pre></td></tr></table></figure>
-
-<p>如上，为了对函数签名进行推断，需要先构造出来一个 JavaParserFacade 对象，也是通过 typeSolver 构造出来的。上面的部分输出如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public void java.io.PrintStream.println(java.lang.String)&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public synchronized void java.lang.Thread.start()&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@6c8156fd[public static create ()Lcom/google/common/collect/HashBasedTable;]&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@f9f9cbbc[public abstract put (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;]&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如上所示，对函数签名推断得非常准确，包括静态方法和实例方法，抽象、函数形参类型、返回值类型、函数所在的类等，都推断得非常准确。</p>
-<ul>
-<li>对类继承关系推断</li>
-</ul>
-<p>如下的代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析类的继承关系</span></span><br><span class="line">System.out.println(<span class="string">&quot;---- resolve class extend relation&quot;</span>);</span><br><span class="line">cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cid -&gt; &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;current class: &quot;</span> + cid.getFullyQualifiedName().get());</span><br><span class="line">    NodeList&lt;ClassOrInterfaceType&gt; superTypes = cid.getExtendedTypes();</span><br><span class="line">    superTypes.forEach(type -&gt; System.out.println(<span class="string">&quot;super class: &quot;</span> + type.resolve()));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>输出如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.App</span><br><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.thread.MyThread</span><br><span class="line">super class: ReferenceType&#123;java.lang.Thread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当前只定义了两个类，一个是 App，没有定义父类（直接就是 Object），没有打印，MyThread 是一个线程，获取到了父类的类型。</p>
-<h2 id="4-Java-Parser-简单应用"><a href="#4-Java-Parser-简单应用" class="headerlink" title="4. Java Parser 简单应用"></a>4. Java Parser 简单应用</h2><h3 id="4-1-源码间依赖关系分析"><a href="#4-1-源码间依赖关系分析" class="headerlink" title="4.1 源码间依赖关系分析"></a>4.1 源码间依赖关系分析</h3><p>如第 3.2 节中介绍的例子，可以非常方便地基于类型推断获取如下信息：</p>
-<ul>
-<li>当前类的父类或者父接口，并递归获取所有的父类和父接口；</li>
-<li>获取当前所调用函数的 signature（函数签名，包含可以唯一识别一个方法的所有信息，例如所在的类、名字、形参类型列表、返回值类型），从而拿到函数调用关系；</li>
-</ul>
-<p>另外，再结合源码文件和 Java 类定义的对应关系，可以很方便地构造出工程的 CG 图，识别出源码之间的依赖关系分析。</p>
-<h3 id="4-2-Java-代码度量"><a href="#4-2-Java-代码度量" class="headerlink" title="4.2 Java 代码度量"></a>4.2 Java 代码度量</h3><p>实际上，基于 Java Parser 获得的 AST 信息，辅助类型推断特性，可以实现针对源代码的各种度量内容。可以参考<a href="https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508%EF%BC%8C">https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508，</a> 查看常见的代码度量项。针对其中 3.1 所列出的所有的项都可以度量。</p>
-<p>常见的一些度量项：</p>
-<ul>
-<li><p>针对函数：圈复杂度、代码深度、各类代码行信息、调用函数数量、被调用次数、其他诸如入参个数…；</p>
-</li>
-<li><p>针对文件：总代码行、空行、注释行、非空非注释行、代码注释密度…；</p>
-</li>
-<li><p>针对工程：文件总数、代码行总数、平均代码行…</p>
-</li>
-</ul>
-<p>基于 Java Parser 可以很好地进行实现，而且大部分都不需要完整的依赖信息，可以方便地进行度量。</p>
-<h3 id="4-3-Java-规范支持检查"><a href="#4-3-Java-规范支持检查" class="headerlink" title="4.3 Java 规范支持检查"></a>4.3 Java 规范支持检查</h3><p>当前，针对各类规范支持，可以在不同的层面上进行支持，例如直接对源码检查、对解析得到的 Token 进行检查、对 AST 进行检查、在 CFG 和 CG 上进行数据流检查和各种形式化检查等。</p>
-<p>基于 Java Parser，可以实现在 AST 及源码（可以直接读取源码信息）、Token（从 AST 的节点可以获取当前 AST Node 中的所有的 Token）相结合的所有检查。</p>
-<p>例如，PMD 主要是在 AST 上进行的检查，CheckStyle 主要是在 Token 和 AST 上进行的检查，结合类型推断的支持，Java Parser 可以实现比 PMD 和 CheckStyle 更精确的检查。</p>
+<h3 id="2-3-SSA"><a href="#2-3-SSA" class="headerlink" title="2.3 SSA"></a>2.3 SSA</h3><p>SSA 的生成方式介绍，<font color="red">待补充</font></p>
+<h3 id="2-4-CG"><a href="#2-4-CG" class="headerlink" title="2.4 CG"></a>2.4 CG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-5-ICFG"><a href="#2-5-ICFG" class="headerlink" title="2.5 ICFG"></a>2.5 ICFG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-6-CDG、DDG、PDG、SDG"><a href="#2-6-CDG、DDG、PDG、SDG" class="headerlink" title="2.6 CDG、DDG、PDG、SDG"></a>2.6 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-7-PAG、VFG"><a href="#2-7-PAG、VFG" class="headerlink" title="2.7 PAG、VFG"></a>2.7 PAG、VFG</h3><p><font color="red">待补充</font></p>
 ]]></content>
       <categories>
         <category>程序分析</category>
         <category>程序表示</category>
       </categories>
       <tags>
-        <tag>JavaParser</tag>
+        <tag>AST</tag>
+        <tag>SSA</tag>
+        <tag>CFG</tag>
+        <tag>程序表示</tag>
+        <tag>PDG</tag>
+        <tag>CDG</tag>
+        <tag>DDG</tag>
+        <tag>SDG</tag>
       </tags>
   </entry>
   <entry>
@@ -456,54 +618,6 @@
       </categories>
       <tags>
         <tag>程序分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>用于静态代码分析的程序表示——概述</title>
-    <url>/2022/10/24/program-representation/</url>
-    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
-<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
-<span id="more"></span>
-
-<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
-<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
-<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
-<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
-<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
-<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
-<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
-<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
-<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
-<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
-<ul>
-<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
-<li>AST 的生成方式和获取，请参考 <a href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">用于静态代码分析的程序表示——AST获取</a>。</li>
-<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
-<ul>
-<li>涉及到这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
-<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-3-SSA"><a href="#2-3-SSA" class="headerlink" title="2.3 SSA"></a>2.3 SSA</h3><p>SSA 的生成方式介绍，<font color="red">待补充</font></p>
-<h3 id="2-4-CG"><a href="#2-4-CG" class="headerlink" title="2.4 CG"></a>2.4 CG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-5-ICFG"><a href="#2-5-ICFG" class="headerlink" title="2.5 ICFG"></a>2.5 ICFG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-6-CDG、DDG、PDG、SDG"><a href="#2-6-CDG、DDG、PDG、SDG" class="headerlink" title="2.6 CDG、DDG、PDG、SDG"></a>2.6 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-7-PAG、VFG"><a href="#2-7-PAG、VFG" class="headerlink" title="2.7 PAG、VFG"></a>2.7 PAG、VFG</h3><p><font color="red">待补充</font></p>
-]]></content>
-      <categories>
-        <category>程序分析</category>
-        <category>程序表示</category>
-      </categories>
-      <tags>
-        <tag>AST</tag>
-        <tag>SSA</tag>
-        <tag>CFG</tag>
-        <tag>程序表示</tag>
-        <tag>PDG</tag>
-        <tag>CDG</tag>
-        <tag>DDG</tag>
-        <tag>SDG</tag>
       </tags>
   </entry>
 </search>
