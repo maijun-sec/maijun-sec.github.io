@@ -66,7 +66,7 @@
     <link href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/"/>
     <id>https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/</id>
     <published>2022-10-25T14:32:40.000Z</published>
-    <updated>2022-10-25T16:05:11.507Z</updated>
+    <updated>2022-10-26T13:04:12.139Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-概述&quot;&gt;&lt;a href=&quot;#1-概述&quot; class=&quot;headerlink&quot; title=&quot;1. 概述&quot;&gt;&lt;/a&gt;1. 概述&lt;/h2&gt;&lt;p&gt;我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。&lt;/p&gt;
