@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-26T13:52:41.786Z</updated>
+  <updated>2022-10-26T13:55:47.447Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -21,16 +21,11 @@
     <link href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/"/>
     <id>https://maijun-sec.github.io/2022/10/26/program-representation-visitor/</id>
     <published>2022-10-26T13:38:00.000Z</published>
-    <updated>2022-10-26T13:52:41.786Z</updated>
+    <updated>2022-10-26T13:55:47.447Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;1-概述&quot;&gt;&lt;a href=&quot;#1-概述&quot; class=&quot;headerlink&quot; title=&quot;1. 概述&quot;&gt;&lt;/a&gt;1. 概述&lt;/h2&gt;&lt;p&gt;访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST</summary>
-        
-      
+    <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在 infoq 上的原创文章，原文链接是：&lt;a href=&quot;https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28&quot;&gt;https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&quot;1-概述&quot;&gt;&lt;a href=&quot;#1-概述&quot; class=&quot;headerlink&quot; title=&quot;1. 概述&quot;&gt;&lt;/a&gt;1. 概述&lt;/h2&gt;&lt;p&gt;访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。&lt;/p&gt;</summary>
     
     
     
@@ -93,7 +88,7 @@
     <link href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/"/>
     <id>https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/</id>
     <published>2022-10-25T14:32:40.000Z</published>
-    <updated>2022-10-26T13:07:09.910Z</updated>
+    <updated>2022-10-26T14:00:39.653Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-概述&quot;&gt;&lt;a href=&quot;#1-概述&quot; class=&quot;headerlink&quot; title=&quot;1. 概述&quot;&gt;&lt;/a&gt;1. 概述&lt;/h2&gt;&lt;p&gt;我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。&lt;/p&gt;

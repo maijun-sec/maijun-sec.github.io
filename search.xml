@@ -162,10 +162,11 @@
 <h4 id="2-2-2-从具体语法树到抽象语法树"><a href="#2-2-2-从具体语法树到抽象语法树" class="headerlink" title="2.2.2 从具体语法树到抽象语法树"></a>2.2.2 从具体语法树到抽象语法树</h4><p><font color="red">待补充</font></p>
 <h4 id="2-2-3-token获取"><a href="#2-2-3-token获取" class="headerlink" title="2.2.3 token获取"></a>2.2.3 token获取</h4><p><font color="red">待补充</font></p>
 <h3 id="2-3-基于词法分析生成"><a href="#2-3-基于词法分析生成" class="headerlink" title="2.3 基于词法分析生成"></a>2.3 基于词法分析生成</h3><p>说实话，自己解析 token，然后通过自己实现 上下文无关文法 的解析，然后构造 AST，我还没有做过，这里就先不介绍了，大家可以参考部分编译器（例如 clang）的实现，或者看看 Antlr4 的源码。以后我要是做到了这部分工作，我再回来补充。</p>
-<h2 id="3-AST-的遍历"><a href="#3-AST-的遍历" class="headerlink" title="3. AST 的遍历"></a>3. AST 的遍历</h2><p>主要是两篇博客：</p>
+<h2 id="3-AST-的遍历"><a href="#3-AST-的遍历" class="headerlink" title="3. AST 的遍历"></a>3. AST 的遍历</h2><p>针对 AST 的遍历，主要是两种设计模式：访问者设计模式 和 监听者设计模式</p>
+<p>针对这两部分，可以参考下面的两个博客：</p>
 <ul>
-<li>visitor 模式文章：<font color="red">待补充</font></li>
-<li>JavaParser 的介绍的文章：<font color="red">待补充</font></li>
+<li>Antlr4 的遍历：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/">Antlr4简明使用教程</a></li>
+<li>一个访问者模式的介绍，并且结合具体例子介绍：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/">访问者模式及其在 Java Parser 中的应用</a></li>
 </ul>
 ]]></content>
       <categories>
@@ -426,7 +427,10 @@
   <entry>
     <title>【转载】访问者模式及其在 Java Parser 中的应用</title>
     <url>/2022/10/26/program-representation-visitor/</url>
-    <content><![CDATA[<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。</p>
+    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28">https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28</a></p>
+<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。</p>
+<span id="more"></span>
+
 <p>本文将首先介绍访问者模式的概念和相关知识，然后通过 JavaParser 的源码分析，介绍访问者模式具体的应用。</p>
 <h2 id="2-访问者模式介绍"><a href="#2-访问者模式介绍" class="headerlink" title="2. 访问者模式介绍"></a>2. 访问者模式介绍</h2><h3 id="2-1-引例"><a href="#2-1-引例" class="headerlink" title="2.1 引例"></a>2.1 引例</h3><p>首先我们通过一个案例来引入对访问者模式的介绍。</p>
 <p>杭州是一个美丽的城市，每年会有大量的游客到杭州过来游玩，美丽的西湖和香火鼎盛的灵隐寺都是游客必往之地。而对于美丽的西湖，又有断桥残雪、三潭印月等西湖十景，灵隐寺景区还有济公殿、大雄宝殿等不同的建筑。</p>
