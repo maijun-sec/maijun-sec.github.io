@@ -20,23 +20,31 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"maijun-sec.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.13.1","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta property="og:type" content="website">
-<meta property="og:title" content="程序静态分析技术笔记">
-<meta property="og:url" content="https://maijun-sec.github.io/index.html">
+    <meta name="description" content="1. 概述访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【转载】访问者模式及其在 Java Parser 中的应用">
+<meta property="og:url" content="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/index.html">
 <meta property="og:site_name" content="程序静态分析技术笔记">
+<meta property="og:description" content="1. 概述访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/hangzhou_visitor.png">
+<meta property="og:image" content="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/hangzhou_visit_design.png">
+<meta property="article:published_time" content="2022-10-26T13:38:00.000Z">
+<meta property="article:modified_time" content="2022-10-26T13:52:41.786Z">
 <meta property="article:author" content="maijun">
+<meta property="article:tag" content="visitor设计模式">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/hangzhou_visitor.png">
 
 
-<link rel="canonical" href="https://maijun-sec.github.io/">
+<link rel="canonical" href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":true,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://maijun-sec.github.io/2022/10/26/program-representation-visitor/","path":"2022/10/26/program-representation-visitor/","title":"【转载】访问者模式及其在 Java Parser 中的应用"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>程序静态分析技术笔记</title>
+<title>【转载】访问者模式及其在 Java Parser 中的应用 | 程序静态分析技术笔记</title>
   
 
 
@@ -68,7 +76,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">程序静态分析技术笔记</h1>
+      <p class="site-title">程序静态分析技术笔记</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -127,7 +135,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -140,6 +148,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D"><span class="nav-text">2. 访问者模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%BC%95%E4%BE%8B"><span class="nav-text">2.1 引例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81"><span class="nav-text">2.2 示例代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%9F%BA%E4%BA%8E%E5%8C%85%E8%A3%85%E5%99%A8%E7%9A%84%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F%E8%AE%BF%E9%97%AE%E4%BC%98%E5%8C%96"><span class="nav-text">3. 基于包装器的访问者模式访问优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-JavaParser-%E4%B8%AD%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8"><span class="nav-text">4. JavaParser 中访问者模式应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%80%BB%E7%BB%93"><span class="nav-text">5. 总结</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -194,16 +203,17 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -217,13 +227,13 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
+      <meta itemprop="name" content="【转载】访问者模式及其在 Java Parser 中的应用 | 程序静态分析技术笔记">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/26/program-representation-visitor/" class="post-title-link" itemprop="url">【转载】访问者模式及其在 Java Parser 中的应用</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          【转载】访问者模式及其在 Java Parser 中的应用
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -260,7 +270,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。</p>
+        <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。</p>
 <p>本文将首先介绍访问者模式的概念和相关知识，然后通过 JavaParser 的源码分析，介绍访问者模式具体的应用。</p>
 <h2 id="2-访问者模式介绍"><a href="#2-访问者模式介绍" class="headerlink" title="2. 访问者模式介绍"></a>2. 访问者模式介绍</h2><h3 id="2-1-引例"><a href="#2-1-引例" class="headerlink" title="2.1 引例"></a>2.1 引例</h3><p>首先我们通过一个案例来引入对访问者模式的介绍。</p>
 <p>杭州是一个美丽的城市，每年会有大量的游客到杭州过来游玩，美丽的西湖和香火鼎盛的灵隐寺都是游客必往之地。而对于美丽的西湖，又有断桥残雪、三潭印月等西湖十景，灵隐寺景区还有济公殿、大雄宝殿等不同的建筑。</p>
@@ -334,7 +344,6 @@
 <p>(4) 介绍了一个简单的 Java 缺陷的检查的代码，实际上，Java 静态代码分析工具 PMD，就是基于该思路进行的开发。</p>
 <p>本文主要目的是介绍访问者模式在 JavaParser 中的应用，或者更进一步，介绍访问者模式如果在基于 AST 遍历的静态代码分析工具中的缺陷检查上的应用（只要是能够生成 AST 的语言，都可以有类似实现）。</p>
 
-      
     </div>
 
     
@@ -342,605 +351,59 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>maijun
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/" title="【转载】访问者模式及其在 Java Parser 中的应用">https://maijun-sec.github.io/2022/10/26/program-representation-visitor/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
 </div>
 
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
 
+  <div class="social-list">
 
+      <div class="social-item">
+        <a target="_blank" class="social-link" href="/atom.xml">
+          <span class="icon">
+            <i class="fa fa-rss"></i>
+          </span>
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="maijun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/26/program-representation-antlr-basic/" class="post-title-link" itemprop="url">【转载】Antlr4简明使用教程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-10-26 20:05:49 / 修改时间：20:58:32" itemprop="dateCreated datePublished" datetime="2022-10-26T20:05:49+08:00">2022-10-26</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">程序分析</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/" itemprop="url" rel="index"><span itemprop="name">程序表示</span></a>
-        </span>
-    </span>
-
-  
+          <span class="label">RSS</span>
+        </a>
+      </div>
+  </div>
 </div>
 
-        </div>
-      </header>
+          <div class="post-tags">
+              <a href="/tags/visitor%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag"># visitor设计模式</a>
+          </div>
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><strong>说明</strong>：本文是作者首发在 华为云bbs 上的原创文章，原文链接是：<a target="_blank" rel="noopener" href="https://bbs.huaweicloud.com/blogs/226877">https://bbs.huaweicloud.com/blogs/226877</a></p>
-<h2 id="1-Antlr4简单介绍"><a href="#1-Antlr4简单介绍" class="headerlink" title="1. Antlr4简单介绍"></a>1. Antlr4简单介绍</h2><p>Antlr4（Another Tool for Language Recognition）是一款基于Java开发的开源的语法分析器生成工具，能够根据语法规则文件生成对应的语法分析器，广泛应用于DSL构建，语言词法语法解析等领域。现在在非常多的流行的框架中都用使用，例如，在构建特定语言的AST方面，CheckStyle工具，就是基于Antlr来解析Java的语法结构的（当前Java Parser是基于JavaCC来解析Java文件的，据说有规划在下个版本改用Antlr来解析），还有就是广泛应用在DSL构建上，著名的Eclipse Xtext就有使用Antlr。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/10/26/program-representation-antlr-basic/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="maijun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/25/program-representation-javaparser-intro/" class="post-title-link" itemprop="url">【转载】JavaParser应用介绍</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2022-10-25 23:13:56 / 修改时间：23:53:03" itemprop="dateCreated datePublished" datetime="2022-10-25T23:13:56+08:00">2022-10-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">程序分析</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/" itemprop="url" rel="index"><span itemprop="name">程序表示</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a target="_blank" rel="noopener" href="https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96">https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96</a></p>
-<h2 id="0-Java-Parser-基本信息"><a href="#0-Java-Parser-基本信息" class="headerlink" title="0. Java Parser 基本信息"></a>0. Java Parser 基本信息</h2><p>Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。</p>
-<p>Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/10/25/program-representation-javaparser-intro/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/26/program-representation-antlr-basic/" rel="prev" title="【转载】Antlr4简明使用教程">
+                  <i class="fa fa-chevron-left"></i> 【转载】Antlr4简明使用教程
+                </a>
             </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="maijun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/25/program-representation-ast-gen/" class="post-title-link" itemprop="url">用于静态代码分析的程序表示——AST获取</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-10-25 22:32:40" itemprop="dateCreated datePublished" datetime="2022-10-25T22:32:40+08:00">2022-10-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-10-26 21:07:09" itemprop="dateModified" datetime="2022-10-26T21:07:09+08:00">2022-10-26</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">程序分析</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/" itemprop="url" rel="index"><span itemprop="name">程序表示</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。</p>
-<p>当然，有时候已有的开源工具或者框架对于我们来说可能并不合适，这个时候还是要自己生成的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/10/25/program-representation-ast-gen/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
+            <div class="post-nav-item">
             </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          </div>
     </footer>
   </article>
 </div>
 
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="maijun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/24/program-representation-ast-ssa/" class="post-title-link" itemprop="url">【转载】静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-10-24 20:29:19" itemprop="dateCreated datePublished" datetime="2022-10-24T20:29:19+08:00">2022-10-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-10-25 22:08:56" itemprop="dateModified" datetime="2022-10-25T22:08:56+08:00">2022-10-25</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">程序分析</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/" itemprop="url" rel="index"><span itemprop="name">程序表示</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><strong>说明</strong>：本文是作者首发在华为云bbs上的原创文章，原文链接是：<a target="_blank" rel="noopener" href="https://bbs.huaweicloud.com/blogs/227535">https://bbs.huaweicloud.com/blogs/227535</a></p>
-<h2 id="0-简介"><a href="#0-简介" class="headerlink" title="0 简介"></a>0 简介</h2><p>静态代码分析是指在不实际执行程序的情况下，对代码语义和行为进行分析，由此找出程序中由于错误的编码导致异常的程序语义或未定义的行为。它能在软件开发流程早期就发现代码中的各种问题，从而提高开发效率和软件质量。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/10/24/program-representation-ast-ssa/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/24/program-representation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="maijun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/24/program-representation/" class="post-title-link" itemprop="url">用于静态代码分析的程序表示——概述</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-10-24 20:25:28" itemprop="dateCreated datePublished" datetime="2022-10-24T20:25:28+08:00">2022-10-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-10-26 00:14:08" itemprop="dateModified" datetime="2022-10-26T00:14:08+08:00">2022-10-26</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">程序分析</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/" itemprop="url" rel="index"><span itemprop="name">程序表示</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
-<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/10/24/program-representation/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/23/sast-theory-intro/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="maijun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/23/sast-theory-intro/" class="post-title-link" itemprop="url">面向源码的静态代码分析简介</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-10-23 15:21:03" itemprop="dateCreated datePublished" datetime="2022-10-23T15:21:03+08:00">2022-10-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-10-24 20:22:47" itemprop="dateModified" datetime="2022-10-24T20:22:47+08:00">2022-10-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">程序分析</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90/%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%E7%AE%80%E4%BB%8B/" itemprop="url" rel="index"><span itemprop="name">程序分析简介</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="1-面向源码的静态分析概念"><a href="#1-面向源码的静态分析概念" class="headerlink" title="1. 面向源码的静态分析概念"></a>1. 面向源码的静态分析概念</h2><p>软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：</p>
-<table>
-<thead>
-<tr>
-<th>分类依据</th>
-<th>分类结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>分析的输入</td>
-<td>基于源码的分析和基于二进制的分析</td>
-</tr>
-<tr>
-<td>是否需要执行代码</td>
-<td>静态分析和动态分析</td>
-</tr>
-<tr>
-<td>分析方法</td>
-<td>面向语法的分析和面向语义的分析</td>
-</tr>
-<tr>
-<td>使用的具体算法</td>
-<td>符号执行、抽象解释、定理证明、数据流分析等</td>
-</tr>
-</tbody></table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/10/23/sast-theory-intro/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
 
 
 
