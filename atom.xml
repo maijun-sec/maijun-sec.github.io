@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-26T12:24:03.134Z</updated>
+  <updated>2022-10-26T12:53:37.581Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -18,13 +18,13 @@
   
   <entry>
     <title>【转载】Antlr4简明使用教程</title>
-    <link href="https://maijun-sec.github.io/2022/10/26/program-representation-altlr-basic/"/>
-    <id>https://maijun-sec.github.io/2022/10/26/program-representation-altlr-basic/</id>
+    <link href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/"/>
+    <id>https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/</id>
     <published>2022-10-26T12:05:49.000Z</published>
-    <updated>2022-10-26T12:24:03.134Z</updated>
+    <updated>2022-10-26T12:53:37.581Z</updated>
     
     
-    <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在 infoq 上的原创文章，原文链接是：&lt;a href=&quot;https://bbs.huaweicloud.com/blogs/226877&quot;&gt;https://bbs.huaweicloud.com/blogs/226877&lt;/a&gt;&lt;/p&gt;
+    <summary type="html">&lt;p&gt;&lt;strong&gt;说明&lt;/strong&gt;：本文是作者首发在 华为云bbs 上的原创文章，原文链接是：&lt;a href=&quot;https://bbs.huaweicloud.com/blogs/226877&quot;&gt;https://bbs.huaweicloud.com/blogs/226877&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&quot;1-Antlr4简单介绍&quot;&gt;&lt;a href=&quot;#1-Antlr4简单介绍&quot; class=&quot;headerlink&quot; title=&quot;1. Antlr4简单介绍&quot;&gt;&lt;/a&gt;1. Antlr4简单介绍&lt;/h2&gt;&lt;p&gt;Antlr4（Another Tool for Language Recognition）是一款基于Java开发的开源的语法分析器生成工具，能够根据语法规则文件生成对应的语法分析器，广泛应用于DSL构建，语言词法语法解析等领域。现在在非常多的流行的框架中都用使用，例如，在构建特定语言的AST方面，CheckStyle工具，就是基于Antlr来解析Java的语法结构的（当前Java Parser是基于JavaCC来解析Java文件的，据说有规划在下个版本改用Antlr来解析），还有就是广泛应用在DSL构建上，著名的Eclipse Xtext就有使用Antlr。&lt;/p&gt;</summary>
     
     
