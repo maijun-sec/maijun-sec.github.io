@@ -1,101 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>流图的遍历方法</title>
-    <url>/2022/10/27/graph-search-basic/</url>
-    <content><![CDATA[<h2 id="1-流图"><a href="#1-流图" class="headerlink" title="1. 流图"></a>1. 流图</h2><p>本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。</p>
-<p>本文介绍的流图具有如下的特点：</p>
-<ul>
-<li>有唯一的 entry 节点</li>
-<li>是一个有向图，并且图中可能有环</li>
-<li>从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点</li>
-</ul>
-<p>从根节点出发遍历图中的每个节点，并且每个节点仅被访问一次，称为<strong>图的遍历</strong>。 类似与树的遍历，图也有深度优先和广度优先两种遍历方式，不同的是，图中会有环，因此需要对已经访问的节点进行记录，避免重复遍历。</p>
-<p>针对流图的遍历，有两种方式：深度优先遍历和广度优先遍历。</p>
-<h2 id="2-深度优先遍历"><a href="#2-深度优先遍历" class="headerlink" title="2. 深度优先遍历"></a>2. 深度优先遍历</h2><h3 id="2-1-深度优先遍历举例介绍"><a href="#2-1-深度优先遍历举例介绍" class="headerlink" title="2.1 深度优先遍历举例介绍"></a>2.1 深度优先遍历举例介绍</h3><p>深度优先遍历所使用的策略，就跟它的名字一样：只要有可能，就会沿着图尽可能地进行“深入”遍历。具体来说，就是遍历到某个节点时，会先沿着这个节点的出边进行尽可能深入地遍历，等遍历结束后，会回溯到上个节点再继续遍历，直到遍历完成。</p>
-<p>下面会举个例子进行介绍，</p>
-<p><img src="/2022/10/27/graph-search-basic/flow-graph-example.png"></p>
-<p>如上图，是一个流图，其 entry 为 A 节点（所有的遍历的入口）。</p>
-<p>其深度优先遍历的顺序如下图所示：</p>
-<p><img src="/2022/10/27/graph-search-basic/dfs_flow_graph.png"></p>
-<p>我们对遍历顺序进行详细介绍。</p>
-<p><strong>说明</strong>：</p>
-<ul>
-<li>有向图每个节点的出边，一般没有顺序，即不管先遍历哪一个都行</li>
-<li>我们为了方便，每次都是沿着左边进行遍历</li>
-</ul>
-<p>如上图所示，遍历的步骤如下：</p>
-<ul>
-<li>entry 为 A，即 A 为第一个被遍历到，其序号为 1</li>
-<li>A 有两条出边，延左边的出边遍历，即 B，其序号为 2</li>
-<li>B 有两条出边，沿左边的出边遍历，即 D，其序号为 3</li>
-<li>D 有两条出边，延左边的出边遍历，即 F，其序号为 4</li>
-<li>F 有两条出边，延左边的出边遍历，即 I，其序号为 5</li>
-<li>I 只有一条出边，延该出边遍历，即 L，其序号为 6</li>
-<li>L 有两条出边，但是因为左边的出边为 B，舍弃，改延右边的出边遍历，即 M，其序号为 7</li>
-<li>M 没有出边，此时我们进行回溯，M 回溯到 L，我们发现 L 的两条边都已经遍历到，继续回溯</li>
-<li>回溯到 L，L 只有一条出边，也已经遍历到，继续回溯到 F</li>
-<li>F 有两条出边，其中左边 L 已经被遍历，此时延右边遍历，即 K，其序号为 8</li>
-<li>K 有一条出边，为 L，但是已经遍历，不再遍历，开始回溯</li>
-<li>回溯到 F，发现 F 的两条出边都已经遍历到，此时继续回溯到 D</li>
-<li>D 有两条出边，其中左边的出边已经遍历到，此时遍历右边的出边，即 G，其序号为 9</li>
-<li>G 只有一条出边，延该出边遍历，即 J，其序号为 10</li>
-<li>J 有一条出边，但是出边 L 已经被遍历到，不再遍历，开始回溯</li>
-<li>此时，通过反向回溯到 G，再到 D，再到 B，都没有未遍历的边，继续回溯到 A</li>
-<li>A 左边的出边已经遍历，改为遍历右边的出边，即 C，其序号为 11</li>
-<li>C 有两个出边，延左边的出边遍历，即 E，其序号为 12</li>
-<li>E 有两条出边，但是左边的出边到 C，已经遍历，改为右边的出边，即 H，其序号为 13</li>
-<li>H 有一条出边，但是指向 M，已经遍历到，不再遍历，开始回溯</li>
-<li>H 回溯到 E，E 两条边都已经遍历到，继续回溯到 C，看右边的出边，但是右边的出边也遍历到，不再遍历。</li>
-<li>此时遍历结束。</li>
-</ul>
-<p>就形成了上图中，我们标出来的每个节点的遍历的次序。如上图，我们给每个节点都标注了数字，即遍历的顺序。</p>
-<h3 id="2-2-和深度优先遍历相关的几个概念"><a href="#2-2-和深度优先遍历相关的几个概念" class="headerlink" title="2.2 和深度优先遍历相关的几个概念"></a>2.2 和深度优先遍历相关的几个概念</h3><h4 id="2-2-1-dfn序"><a href="#2-2-1-dfn序" class="headerlink" title="2.2.1 dfn序"></a>2.2.1 dfn序</h4><p>如上一节，在通过深度优先遍历遍历图时，对每个节点的遍历顺序按数字排序，例如 A 为 1，H 为 13，这个数字就是该节点的 dfn 序：</p>
-<ul>
-<li>dfn(A) &#x3D; 1</li>
-<li>dfn(H) &#x3D; 13</li>
-</ul>
-<p><strong>说明</strong>：</p>
-<ul>
-<li>在有些资料里面，dfn 序从 0 开始，但是仅仅数字差1，没有很大的影响</li>
-<li>在有些资料里面，dfn 也命名为 dfnum，大家知道两者一样即可，例如 dfnum(H)&#x3D;13</li>
-</ul>
-<h4 id="2-2-2-深度优先生成树-dfs树"><a href="#2-2-2-深度优先生成树-dfs树" class="headerlink" title="2.2.2 深度优先生成树(dfs树)"></a>2.2.2 深度优先生成树(dfs树)</h4><p>如上一节中，我们在介绍遍历顺序的时候，沿着有效遍历节点，我们通过<strong>绿色粗实线</strong>标注了遍历的关系，我们将图中的红色虚线去除，就形成了一个树状结构，如下图所示：</p>
-<p><img src="/2022/10/27/graph-search-basic/dfs_tree.png"></p>
-<p>这是一个树状结构，我们将其称为 <strong>DFS树</strong> 或者是 <strong>深度优先生成树</strong>。</p>
-<p>针对 深度优先生成树，有几点需要说明的情况：</p>
-<ul>
-<li>深度优先生成树不是唯一的，如上例，我们遍历的时候，都是延左边的出边执行的，如果延右边的出边，或者部分延左边的出边，部分延右边的出边，形成的深度优先生成树可能不同；</li>
-<li>深度优先生成树是一棵树，不是图，没有环，因此适用于树的概念：比如祖先、真祖先（如果一个节点v在节点w和根节点之间(包括w和根节点)，则v是w的祖先，如果v和w不同，则v是w的真祖先）；</li>
-<li>如果 v 是 w 的真祖先，则 dfn(v) &lt; dfn(w)</li>
-</ul>
-<h4 id="2-2-3-几种边的类型"><a href="#2-2-3-几种边的类型" class="headerlink" title="2.2.3 几种边的类型"></a>2.2.3 几种边的类型</h4><p>在2.1节中，我们对深度优先遍历举例时，我们主要形成了三类数据：</p>
-<ul>
-<li>和节点在一起的数字，即 dfn 序</li>
-<li>绿色实线边组成的树，即 深度优先生成树</li>
-<li>红色虚线边</li>
-</ul>
-<p>这一节，我们介绍一下红色虚线边，我们将红色虚线边分成三类，大家继续看2.1节中形成的图：</p>
-<ul>
-<li>前向边：将节点 v 连接到 dfs树 中 v 的后代节点 w 的边，如 B-&gt;G，C-&gt;H</li>
-<li>后向边：和前向边相反，是节点 v 连接到 dfs 树中 v 的祖先节点 w 的边，如 L-&gt;B，E-&gt;C</li>
-<li>横线边：其它的在 DFS树 中不存在祖先和后代关系，但是在CFG中有边连接的点的边，如 J-&gt;L，H-&gt;M</li>
-</ul>
-<h4 id="2-2-4-深度优先遍历代码举例"><a href="#2-2-4-深度优先遍历代码举例" class="headerlink" title="2.2.4 深度优先遍历代码举例"></a>2.2.4 深度优先遍历代码举例</h4><p><font color="red">待补充</font></p>
-<h2 id="3-广度优先遍历"><a href="#3-广度优先遍历" class="headerlink" title="3. 广度优先遍历"></a>3. 广度优先遍历</h2><p><font color="red">待补充</font></p>
-]]></content>
-      <categories>
-        <category>图论</category>
-        <category>流图遍历</category>
-      </categories>
-      <tags>
-        <tag>流图</tag>
-        <tag>深度优先遍历</tag>
-        <tag>广度优先遍历</tag>
-        <tag>深度优先搜索树</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【转载】Antlr4简明使用教程</title>
     <url>/2022/10/26/program-representation-antlr-basic/</url>
     <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 华为云bbs 上的原创文章，原文链接是：<a href="https://bbs.huaweicloud.com/blogs/226877">https://bbs.huaweicloud.com/blogs/226877</a></p>
@@ -272,6 +177,103 @@
       </categories>
       <tags>
         <tag>AST</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>流图的深度优先遍历和广度优先遍历</title>
+    <url>/2022/10/27/graph-search-basic/</url>
+    <content><![CDATA[<h2 id="1-流图"><a href="#1-流图" class="headerlink" title="1. 流图"></a>1. 流图</h2><p>本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。</p>
+<p>本文介绍的流图具有如下的特点：</p>
+<ul>
+<li>有唯一的 entry 节点</li>
+<li>是一个有向图，并且图中可能有环</li>
+<li>从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点</li>
+</ul>
+<span id="more"></span>
+
+<p>从根节点出发遍历图中的每个节点，并且每个节点仅被访问一次，称为<strong>图的遍历</strong>。 类似与树的遍历，图也有深度优先和广度优先两种遍历方式，不同的是，图中会有环，因此需要对已经访问的节点进行记录，避免重复遍历。</p>
+<p>针对流图的遍历，有两种方式：深度优先遍历和广度优先遍历。</p>
+<h2 id="2-深度优先遍历"><a href="#2-深度优先遍历" class="headerlink" title="2. 深度优先遍历"></a>2. 深度优先遍历</h2><h3 id="2-1-深度优先遍历举例介绍"><a href="#2-1-深度优先遍历举例介绍" class="headerlink" title="2.1 深度优先遍历举例介绍"></a>2.1 深度优先遍历举例介绍</h3><p>深度优先遍历所使用的策略，就跟它的名字一样：只要有可能，就会沿着图尽可能地进行“深入”遍历。具体来说，就是遍历到某个节点时，会先沿着这个节点的出边进行尽可能深入地遍历，等遍历结束后，会回溯到上个节点再继续遍历，直到遍历完成。</p>
+<p>下面会举个例子进行介绍，</p>
+<p><img src="/2022/10/27/graph-search-basic/flow-graph-example.png"></p>
+<p>如上图，是一个流图，其 entry 为 A 节点（所有的遍历的入口）。</p>
+<p>其深度优先遍历的顺序如下图所示：</p>
+<p><img src="/2022/10/27/graph-search-basic/dfs_flow_graph.png"></p>
+<p>我们对遍历顺序进行详细介绍。</p>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>有向图每个节点的出边，一般没有顺序，即不管先遍历哪一个都行</li>
+<li>我们为了方便，每次都是沿着左边进行遍历</li>
+</ul>
+<p>如上图所示，遍历的步骤如下：</p>
+<ul>
+<li>entry 为 A，即 A 为第一个被遍历到，其序号为 1</li>
+<li>A 有两条出边，延左边的出边遍历，即 B，其序号为 2</li>
+<li>B 有两条出边，沿左边的出边遍历，即 D，其序号为 3</li>
+<li>D 有两条出边，延左边的出边遍历，即 F，其序号为 4</li>
+<li>F 有两条出边，延左边的出边遍历，即 I，其序号为 5</li>
+<li>I 只有一条出边，延该出边遍历，即 L，其序号为 6</li>
+<li>L 有两条出边，但是因为左边的出边为 B，舍弃，改延右边的出边遍历，即 M，其序号为 7</li>
+<li>M 没有出边，此时我们进行回溯，M 回溯到 L，我们发现 L 的两条边都已经遍历到，继续回溯</li>
+<li>回溯到 L，L 只有一条出边，也已经遍历到，继续回溯到 F</li>
+<li>F 有两条出边，其中左边 L 已经被遍历，此时延右边遍历，即 K，其序号为 8</li>
+<li>K 有一条出边，为 L，但是已经遍历，不再遍历，开始回溯</li>
+<li>回溯到 F，发现 F 的两条出边都已经遍历到，此时继续回溯到 D</li>
+<li>D 有两条出边，其中左边的出边已经遍历到，此时遍历右边的出边，即 G，其序号为 9</li>
+<li>G 只有一条出边，延该出边遍历，即 J，其序号为 10</li>
+<li>J 有一条出边，但是出边 L 已经被遍历到，不再遍历，开始回溯</li>
+<li>此时，通过反向回溯到 G，再到 D，再到 B，都没有未遍历的边，继续回溯到 A</li>
+<li>A 左边的出边已经遍历，改为遍历右边的出边，即 C，其序号为 11</li>
+<li>C 有两个出边，延左边的出边遍历，即 E，其序号为 12</li>
+<li>E 有两条出边，但是左边的出边到 C，已经遍历，改为右边的出边，即 H，其序号为 13</li>
+<li>H 有一条出边，但是指向 M，已经遍历到，不再遍历，开始回溯</li>
+<li>H 回溯到 E，E 两条边都已经遍历到，继续回溯到 C，看右边的出边，但是右边的出边也遍历到，不再遍历。</li>
+<li>此时遍历结束。</li>
+</ul>
+<p>就形成了上图中，我们标出来的每个节点的遍历的次序。如上图，我们给每个节点都标注了数字，即遍历的顺序。</p>
+<h3 id="2-2-和深度优先遍历相关的几个概念"><a href="#2-2-和深度优先遍历相关的几个概念" class="headerlink" title="2.2 和深度优先遍历相关的几个概念"></a>2.2 和深度优先遍历相关的几个概念</h3><h4 id="2-2-1-dfn序"><a href="#2-2-1-dfn序" class="headerlink" title="2.2.1 dfn序"></a>2.2.1 dfn序</h4><p>如上一节，在通过深度优先遍历遍历图时，对每个节点的遍历顺序按数字排序，例如 A 为 1，H 为 13，这个数字就是该节点的 dfn 序：</p>
+<ul>
+<li>dfn(A) &#x3D; 1</li>
+<li>dfn(H) &#x3D; 13</li>
+</ul>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>在有些资料里面，dfn 序从 0 开始，但是仅仅数字差1，没有很大的影响</li>
+<li>在有些资料里面，dfn 也命名为 dfnum，大家知道两者一样即可，例如 dfnum(H)&#x3D;13</li>
+</ul>
+<h4 id="2-2-2-深度优先生成树-dfs树"><a href="#2-2-2-深度优先生成树-dfs树" class="headerlink" title="2.2.2 深度优先生成树(dfs树)"></a>2.2.2 深度优先生成树(dfs树)</h4><p>如上一节中，我们在介绍遍历顺序的时候，沿着有效遍历节点，我们通过<strong>绿色粗实线</strong>标注了遍历的关系，我们将图中的红色虚线去除，就形成了一个树状结构，如下图所示：</p>
+<p><img src="/2022/10/27/graph-search-basic/dfs_tree.png"></p>
+<p>这是一个树状结构，我们将其称为 <strong>DFS树</strong> 或者是 <strong>深度优先生成树</strong>。</p>
+<p>针对 深度优先生成树，有几点需要说明的情况：</p>
+<ul>
+<li>深度优先生成树不是唯一的，如上例，我们遍历的时候，都是延左边的出边执行的，如果延右边的出边，或者部分延左边的出边，部分延右边的出边，形成的深度优先生成树可能不同；</li>
+<li>深度优先生成树是一棵树，不是图，没有环，因此适用于树的概念：比如祖先、真祖先（如果一个节点v在节点w和根节点之间(包括w和根节点)，则v是w的祖先，如果v和w不同，则v是w的真祖先）；</li>
+<li>如果 v 是 w 的真祖先，则 dfn(v) &lt; dfn(w)</li>
+</ul>
+<h4 id="2-2-3-几种边的类型"><a href="#2-2-3-几种边的类型" class="headerlink" title="2.2.3 几种边的类型"></a>2.2.3 几种边的类型</h4><p>在2.1节中，我们对深度优先遍历举例时，我们主要形成了三类数据：</p>
+<ul>
+<li>和节点在一起的数字，即 dfn 序</li>
+<li>绿色实线边组成的树，即 深度优先生成树</li>
+<li>红色虚线边</li>
+</ul>
+<p>这一节，我们介绍一下红色虚线边，我们将红色虚线边分成三类，大家继续看2.1节中形成的图：</p>
+<ul>
+<li>前向边：将节点 v 连接到 dfs树 中 v 的后代节点 w 的边，如 B-&gt;G，C-&gt;H</li>
+<li>后向边：和前向边相反，是节点 v 连接到 dfs 树中 v 的祖先节点 w 的边，如 L-&gt;B，E-&gt;C</li>
+<li>横线边：其它的在 DFS树 中不存在祖先和后代关系，但是在CFG中有边连接的点的边，如 J-&gt;L，H-&gt;M</li>
+</ul>
+<h4 id="2-2-4-深度优先遍历代码举例"><a href="#2-2-4-深度优先遍历代码举例" class="headerlink" title="2.2.4 深度优先遍历代码举例"></a>2.2.4 深度优先遍历代码举例</h4><p><font color="red">待补充</font></p>
+<h2 id="3-广度优先遍历"><a href="#3-广度优先遍历" class="headerlink" title="3. 广度优先遍历"></a>3. 广度优先遍历</h2><p><font color="red">待补充</font></p>
+]]></content>
+      <categories>
+        <category>图论</category>
+        <category>流图遍历</category>
+      </categories>
+      <tags>
+        <tag>流图</tag>
+        <tag>深度优先遍历</tag>
+        <tag>广度优先遍历</tag>
+        <tag>深度优先搜索树</tag>
       </tags>
   </entry>
   <entry>
@@ -613,55 +615,6 @@
       </tags>
   </entry>
   <entry>
-    <title>用于静态代码分析的程序表示——概述</title>
-    <url>/2022/10/24/program-representation/</url>
-    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
-<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
-<span id="more"></span>
-
-<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
-<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
-<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
-<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
-<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
-<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
-<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
-<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
-<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
-<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
-<ul>
-<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
-<li>AST 的生成方式和获取，请参考 <a href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">用于静态代码分析的程序表示——AST获取</a>。</li>
-<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
-<ul>
-<li>涉及到这两个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
-<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-3-SSA"><a href="#2-3-SSA" class="headerlink" title="2.3 SSA"></a>2.3 SSA</h3><p>SSA 的生成方式介绍，<font color="red">待补充</font></p>
-<h3 id="2-4-CG"><a href="#2-4-CG" class="headerlink" title="2.4 CG"></a>2.4 CG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-5-ICFG"><a href="#2-5-ICFG" class="headerlink" title="2.5 ICFG"></a>2.5 ICFG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-6-CDG、DDG、PDG、SDG"><a href="#2-6-CDG、DDG、PDG、SDG" class="headerlink" title="2.6 CDG、DDG、PDG、SDG"></a>2.6 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-7-PAG、VFG"><a href="#2-7-PAG、VFG" class="headerlink" title="2.7 PAG、VFG"></a>2.7 PAG、VFG</h3><p><font color="red">待补充</font></p>
-]]></content>
-      <categories>
-        <category>程序分析</category>
-        <category>程序表示</category>
-        <category>程序表示概述</category>
-      </categories>
-      <tags>
-        <tag>AST</tag>
-        <tag>SSA</tag>
-        <tag>CFG</tag>
-        <tag>程序表示</tag>
-        <tag>PDG</tag>
-        <tag>CDG</tag>
-        <tag>DDG</tag>
-        <tag>SDG</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>面向源码的静态代码分析简介</title>
     <url>/2022/10/23/sast-theory-intro/</url>
     <content><![CDATA[<h2 id="1-面向源码的静态分析概念"><a href="#1-面向源码的静态分析概念" class="headerlink" title="1. 面向源码的静态分析概念"></a>1. 面向源码的静态分析概念</h2><p>软件分析是一门非常大的学科，类型非常多。从不同的角度，可以分为不同的类型：</p>
@@ -807,6 +760,55 @@
       </categories>
       <tags>
         <tag>程序分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用于静态代码分析的程序表示——概述</title>
+    <url>/2022/10/24/program-representation/</url>
+    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
+<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
+<span id="more"></span>
+
+<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
+<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
+<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
+<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
+<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
+<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
+<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
+<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
+<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
+<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
+<ul>
+<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
+<li>AST 的生成方式和获取，请参考 <a href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">用于静态代码分析的程序表示——AST获取</a>。</li>
+<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
+</ul>
+<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
+<ul>
+<li>涉及到这两个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
+<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
+</ul>
+<h3 id="2-3-SSA"><a href="#2-3-SSA" class="headerlink" title="2.3 SSA"></a>2.3 SSA</h3><p>SSA 的生成方式介绍，<font color="red">待补充</font></p>
+<h3 id="2-4-CG"><a href="#2-4-CG" class="headerlink" title="2.4 CG"></a>2.4 CG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-5-ICFG"><a href="#2-5-ICFG" class="headerlink" title="2.5 ICFG"></a>2.5 ICFG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-6-CDG、DDG、PDG、SDG"><a href="#2-6-CDG、DDG、PDG、SDG" class="headerlink" title="2.6 CDG、DDG、PDG、SDG"></a>2.6 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-7-PAG、VFG"><a href="#2-7-PAG、VFG" class="headerlink" title="2.7 PAG、VFG"></a>2.7 PAG、VFG</h3><p><font color="red">待补充</font></p>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+        <category>程序表示概述</category>
+      </categories>
+      <tags>
+        <tag>AST</tag>
+        <tag>SSA</tag>
+        <tag>CFG</tag>
+        <tag>程序表示</tag>
+        <tag>PDG</tag>
+        <tag>CDG</tag>
+        <tag>DDG</tag>
+        <tag>SDG</tag>
       </tags>
   </entry>
 </search>

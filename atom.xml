@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-28T14:45:42.004Z</updated>
+  <updated>2022-10-28T14:51:58.986Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -17,20 +17,20 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>流图的遍历方法</title>
+    <title>流图的深度优先遍历和广度优先遍历</title>
     <link href="https://maijun-sec.github.io/2022/10/27/graph-search-basic/"/>
     <id>https://maijun-sec.github.io/2022/10/27/graph-search-basic/</id>
     <published>2022-10-27T14:30:10.000Z</published>
-    <updated>2022-10-28T14:45:42.004Z</updated>
+    <updated>2022-10-28T14:51:58.986Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;1-流图&quot;&gt;&lt;a href=&quot;#1-流图&quot; class=&quot;headerlink&quot; title=&quot;1. 流图&quot;&gt;&lt;/a&gt;1.</summary>
-        
-      
+    <summary type="html">&lt;h2 id=&quot;1-流图&quot;&gt;&lt;a href=&quot;#1-流图&quot; class=&quot;headerlink&quot; title=&quot;1. 流图&quot;&gt;&lt;/a&gt;1. 流图&lt;/h2&gt;&lt;p&gt;本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。&lt;/p&gt;
+&lt;p&gt;本文介绍的流图具有如下的特点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有唯一的 entry 节点&lt;/li&gt;
+&lt;li&gt;是一个有向图，并且图中可能有环&lt;/li&gt;
+&lt;li&gt;从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点&lt;/li&gt;
+&lt;/ul&gt;</summary>
     
     
     
