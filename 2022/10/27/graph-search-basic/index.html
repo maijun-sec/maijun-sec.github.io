@@ -22,33 +22,30 @@
 
     <meta name="description" content="1. 流图本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。 本文介绍的流图具有如下的特点：  有唯一的 entry 节点 是一个有向图，并且图中可能有环 从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点">
 <meta property="og:type" content="article">
-<meta property="og:title" content="流图的深度优先遍历和广度优先遍历">
+<meta property="og:title" content="流图的深度优先遍历">
 <meta property="og:url" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/index.html">
 <meta property="og:site_name" content="程序静态分析技术笔记">
 <meta property="og:description" content="1. 流图本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。 本文介绍的流图具有如下的特点：  有唯一的 entry 节点 是一个有向图，并且图中可能有环 从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/flow-graph-example.png">
-<meta property="og:image" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/dfs_flow_graph.png">
-<meta property="og:image" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/dfs_tree.png">
+<meta property="og:image" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/dfs_flowgraph.png">
 <meta property="article:published_time" content="2022-10-27T14:30:10.000Z">
-<meta property="article:modified_time" content="2022-10-28T14:51:58.986Z">
+<meta property="article:modified_time" content="2022-10-29T12:44:02.800Z">
 <meta property="article:author" content="maijun">
 <meta property="article:tag" content="流图">
 <meta property="article:tag" content="深度优先遍历">
-<meta property="article:tag" content="广度优先遍历">
 <meta property="article:tag" content="深度优先搜索树">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/flow-graph-example.png">
+<meta name="twitter:image" content="https://maijun-sec.github.io/2022/10/27/graph-search-basic/dfs_flowgraph.png">
 
 
 <link rel="canonical" href="https://maijun-sec.github.io/2022/10/27/graph-search-basic/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://maijun-sec.github.io/2022/10/27/graph-search-basic/","path":"2022/10/27/graph-search-basic/","title":"流图的深度优先遍历和广度优先遍历"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://maijun-sec.github.io/2022/10/27/graph-search-basic/","path":"2022/10/27/graph-search-basic/","title":"流图的深度优先遍历"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>流图的深度优先遍历和广度优先遍历 | 程序静态分析技术笔记</title>
+<title>流图的深度优先遍历 | 程序静态分析技术笔记</title>
   
 
 
@@ -152,7 +149,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%B5%81%E5%9B%BE"><span class="nav-text">1. 流图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86"><span class="nav-text">2. 深度优先遍历</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%E4%B8%BE%E4%BE%8B%E4%BB%8B%E7%BB%8D"><span class="nav-text">2.1 深度优先遍历举例介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%92%8C%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%E7%9B%B8%E5%85%B3%E7%9A%84%E5%87%A0%E4%B8%AA%E6%A6%82%E5%BF%B5"><span class="nav-text">2.2 和深度优先遍历相关的几个概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-dfn%E5%BA%8F"><span class="nav-text">2.2.1 dfn序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E7%94%9F%E6%88%90%E6%A0%91-dfs%E6%A0%91"><span class="nav-text">2.2.2 深度优先生成树(dfs树)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3-%E5%87%A0%E7%A7%8D%E8%BE%B9%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-text">2.2.3 几种边的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-4-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%E4%BB%A3%E7%A0%81%E4%B8%BE%E4%BE%8B"><span class="nav-text">2.2.4 深度优先遍历代码举例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86"><span class="nav-text">3. 广度优先遍历</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%B5%81%E5%9B%BE"><span class="nav-text">1. 流图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%B5%81%E5%9B%BE%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86"><span class="nav-text">2. 流图深度优先遍历</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%E4%B8%BE%E4%BE%8B%E4%BB%8B%E7%BB%8D"><span class="nav-text">2.1 深度优先遍历举例介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%92%8C%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%E7%9B%B8%E5%85%B3%E7%9A%84%E5%87%A0%E4%B8%AA%E6%A6%82%E5%BF%B5"><span class="nav-text">2.2 和深度优先遍历相关的几个概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-dfn%E5%BA%8F"><span class="nav-text">2.2.1 dfn序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E7%94%9F%E6%88%90%E6%A0%91-dfs%E6%A0%91"><span class="nav-text">2.2.2 深度优先生成树(dfs树)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3-%E5%87%A0%E7%A7%8D%E8%BE%B9%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-text">2.2.3 几种边的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86%E4%BB%A3%E7%A0%81%E4%B8%BE%E4%BE%8B"><span class="nav-text">3. 深度优先遍历代码举例</span></a></li></ol></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -176,7 +173,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -231,12 +228,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="流图的深度优先遍历和广度优先遍历 | 程序静态分析技术笔记">
+      <meta itemprop="name" content="流图的深度优先遍历 | 程序静态分析技术笔记">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          流图的深度优先遍历和广度优先遍历
+          流图的深度优先遍历
         </h1>
 
         <div class="post-meta-container">
@@ -254,7 +251,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-10-28 22:51:58" itemprop="dateModified" datetime="2022-10-28T22:51:58+08:00">2022-10-28</time>
+      <time title="修改时间：2022-10-29 20:44:02" itemprop="dateModified" datetime="2022-10-29T20:44:02+08:00">2022-10-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -291,12 +288,11 @@
 
 <p>从根节点出发遍历图中的每个节点，并且每个节点仅被访问一次，称为<strong>图的遍历</strong>。 类似与树的遍历，图也有深度优先和广度优先两种遍历方式，不同的是，图中会有环，因此需要对已经访问的节点进行记录，避免重复遍历。</p>
 <p>针对流图的遍历，有两种方式：深度优先遍历和广度优先遍历。</p>
-<h2 id="2-深度优先遍历"><a href="#2-深度优先遍历" class="headerlink" title="2. 深度优先遍历"></a>2. 深度优先遍历</h2><h3 id="2-1-深度优先遍历举例介绍"><a href="#2-1-深度优先遍历举例介绍" class="headerlink" title="2.1 深度优先遍历举例介绍"></a>2.1 深度优先遍历举例介绍</h3><p>深度优先遍历所使用的策略，就跟它的名字一样：只要有可能，就会沿着图尽可能地进行“深入”遍历。具体来说，就是遍历到某个节点时，会先沿着这个节点的出边进行尽可能深入地遍历，等遍历结束后，会回溯到上个节点再继续遍历，直到遍历完成。</p>
+<h2 id="2-流图深度优先遍历"><a href="#2-流图深度优先遍历" class="headerlink" title="2. 流图深度优先遍历"></a>2. 流图深度优先遍历</h2><h3 id="2-1-深度优先遍历举例介绍"><a href="#2-1-深度优先遍历举例介绍" class="headerlink" title="2.1 深度优先遍历举例介绍"></a>2.1 深度优先遍历举例介绍</h3><p>深度优先遍历所使用的策略，就跟它的名字一样：只要有可能，就会沿着图尽可能地进行“深入”遍历。具体来说，就是遍历到某个节点时，会先沿着这个节点的出边进行尽可能深入地遍历，等遍历结束后，会回溯到上个节点再继续遍历，直到遍历完成。</p>
 <p>下面会举个例子进行介绍，</p>
-<p><img src="/2022/10/27/graph-search-basic/flow-graph-example.png"></p>
-<p>如上图，是一个流图，其 entry 为 A 节点（所有的遍历的入口）。</p>
-<p>其深度优先遍历的顺序如下图所示：</p>
-<p><img src="/2022/10/27/graph-search-basic/dfs_flow_graph.png"></p>
+<p><img src="/2022/10/27/graph-search-basic/dfs_flowgraph.png"></p>
+<p>如上图(左)，是一个流图，其 entry 为 A 节点（所有的遍历的入口）。</p>
+<p>其深度优先遍历的顺序如 上图(中) 所示：</p>
 <p>我们对遍历顺序进行详细介绍。</p>
 <p><strong>说明</strong>：</p>
 <ul>
@@ -306,29 +302,29 @@
 <p>如上图所示，遍历的步骤如下：</p>
 <ul>
 <li>entry 为 A，即 A 为第一个被遍历到，其序号为 1</li>
-<li>A 有两条出边，延左边的出边遍历，即 B，其序号为 2</li>
+<li>A 有两条出边，沿左边的出边遍历，即 B，其序号为 2</li>
 <li>B 有两条出边，沿左边的出边遍历，即 D，其序号为 3</li>
-<li>D 有两条出边，延左边的出边遍历，即 F，其序号为 4</li>
-<li>F 有两条出边，延左边的出边遍历，即 I，其序号为 5</li>
-<li>I 只有一条出边，延该出边遍历，即 L，其序号为 6</li>
-<li>L 有两条出边，但是因为左边的出边为 B，舍弃，改延右边的出边遍历，即 M，其序号为 7</li>
+<li>D 有两条出边，沿左边的出边遍历，即 F，其序号为 4</li>
+<li>F 有两条出边，沿左边的出边遍历，即 I，其序号为 5</li>
+<li>I 只有一条出边，沿该出边遍历，即 L，其序号为 6</li>
+<li>L 有两条出边，但是因为左边的出边为 B，已经遍历到，改沿右边的出边遍历，即 M，其序号为 7</li>
 <li>M 没有出边，此时我们进行回溯，M 回溯到 L，我们发现 L 的两条边都已经遍历到，继续回溯</li>
 <li>回溯到 L，L 只有一条出边，也已经遍历到，继续回溯到 F</li>
-<li>F 有两条出边，其中左边 L 已经被遍历，此时延右边遍历，即 K，其序号为 8</li>
+<li>F 有两条出边，其中左边 L 已经被遍历，此时沿右边遍历，即 K，其序号为 8</li>
 <li>K 有一条出边，为 L，但是已经遍历，不再遍历，开始回溯</li>
 <li>回溯到 F，发现 F 的两条出边都已经遍历到，此时继续回溯到 D</li>
 <li>D 有两条出边，其中左边的出边已经遍历到，此时遍历右边的出边，即 G，其序号为 9</li>
-<li>G 只有一条出边，延该出边遍历，即 J，其序号为 10</li>
+<li>G 只有一条出边，沿该出边遍历，即 J，其序号为 10</li>
 <li>J 有一条出边，但是出边 L 已经被遍历到，不再遍历，开始回溯</li>
 <li>此时，通过反向回溯到 G，再到 D，再到 B，都没有未遍历的边，继续回溯到 A</li>
 <li>A 左边的出边已经遍历，改为遍历右边的出边，即 C，其序号为 11</li>
-<li>C 有两个出边，延左边的出边遍历，即 E，其序号为 12</li>
+<li>C 有两个出边，沿左边的出边遍历，即 E，其序号为 12</li>
 <li>E 有两条出边，但是左边的出边到 C，已经遍历，改为右边的出边，即 H，其序号为 13</li>
 <li>H 有一条出边，但是指向 M，已经遍历到，不再遍历，开始回溯</li>
 <li>H 回溯到 E，E 两条边都已经遍历到，继续回溯到 C，看右边的出边，但是右边的出边也遍历到，不再遍历。</li>
 <li>此时遍历结束。</li>
 </ul>
-<p>就形成了上图中，我们标出来的每个节点的遍历的次序。如上图，我们给每个节点都标注了数字，即遍历的顺序。</p>
+<p>就形成了上图(中)，我们标出来的每个节点的遍历的次序。如上图，我们给每个节点都标注了数字，即遍历的顺序。</p>
 <h3 id="2-2-和深度优先遍历相关的几个概念"><a href="#2-2-和深度优先遍历相关的几个概念" class="headerlink" title="2.2 和深度优先遍历相关的几个概念"></a>2.2 和深度优先遍历相关的几个概念</h3><h4 id="2-2-1-dfn序"><a href="#2-2-1-dfn序" class="headerlink" title="2.2.1 dfn序"></a>2.2.1 dfn序</h4><p>如上一节，在通过深度优先遍历遍历图时，对每个节点的遍历顺序按数字排序，例如 A 为 1，H 为 13，这个数字就是该节点的 dfn 序：</p>
 <ul>
 <li>dfn(A) &#x3D; 1</li>
@@ -336,11 +332,10 @@
 </ul>
 <p><strong>说明</strong>：</p>
 <ul>
-<li>在有些资料里面，dfn 序从 0 开始，但是仅仅数字差1，没有很大的影响</li>
+<li>在有些资料里面，dfn 序从 0 开始，其实没什么影响，只是起始序号不同</li>
 <li>在有些资料里面，dfn 也命名为 dfnum，大家知道两者一样即可，例如 dfnum(H)&#x3D;13</li>
 </ul>
-<h4 id="2-2-2-深度优先生成树-dfs树"><a href="#2-2-2-深度优先生成树-dfs树" class="headerlink" title="2.2.2 深度优先生成树(dfs树)"></a>2.2.2 深度优先生成树(dfs树)</h4><p>如上一节中，我们在介绍遍历顺序的时候，沿着有效遍历节点，我们通过<strong>绿色粗实线</strong>标注了遍历的关系，我们将图中的红色虚线去除，就形成了一个树状结构，如下图所示：</p>
-<p><img src="/2022/10/27/graph-search-basic/dfs_tree.png"></p>
+<h4 id="2-2-2-深度优先生成树-dfs树"><a href="#2-2-2-深度优先生成树-dfs树" class="headerlink" title="2.2.2 深度优先生成树(dfs树)"></a>2.2.2 深度优先生成树(dfs树)</h4><p>如上一节中，我们在介绍遍历顺序的时候，沿着有效遍历节点，我们通过<strong>绿色粗实线</strong>标注了遍历的关系，我们将图中的红色虚线去除，就形成了一个树状结构，如2.1节中的图(右)</p>
 <p>这是一个树状结构，我们将其称为 <strong>DFS树</strong> 或者是 <strong>深度优先生成树</strong>。</p>
 <p>针对 深度优先生成树，有几点需要说明的情况：</p>
 <ul>
@@ -360,8 +355,7 @@
 <li>后向边：和前向边相反，是节点 v 连接到 dfs 树中 v 的祖先节点 w 的边，如 L-&gt;B，E-&gt;C</li>
 <li>横线边：其它的在 DFS树 中不存在祖先和后代关系，但是在CFG中有边连接的点的边，如 J-&gt;L，H-&gt;M</li>
 </ul>
-<h4 id="2-2-4-深度优先遍历代码举例"><a href="#2-2-4-深度优先遍历代码举例" class="headerlink" title="2.2.4 深度优先遍历代码举例"></a>2.2.4 深度优先遍历代码举例</h4><p><font color="red">待补充</font></p>
-<h2 id="3-广度优先遍历"><a href="#3-广度优先遍历" class="headerlink" title="3. 广度优先遍历"></a>3. 广度优先遍历</h2><p><font color="red">待补充</font></p>
+<h4 id="3-深度优先遍历代码举例"><a href="#3-深度优先遍历代码举例" class="headerlink" title="3. 深度优先遍历代码举例"></a>3. 深度优先遍历代码举例</h4><p>我们不自己开发</p>
 
     </div>
 
@@ -379,7 +373,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://maijun-sec.github.io/2022/10/27/graph-search-basic/" title="流图的深度优先遍历和广度优先遍历">https://maijun-sec.github.io/2022/10/27/graph-search-basic/</a>
+      <a href="https://maijun-sec.github.io/2022/10/27/graph-search-basic/" title="流图的深度优先遍历">https://maijun-sec.github.io/2022/10/27/graph-search-basic/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -407,7 +401,6 @@
           <div class="post-tags">
               <a href="/tags/%E6%B5%81%E5%9B%BE/" rel="tag"># 流图</a>
               <a href="/tags/%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86/" rel="tag"># 深度优先遍历</a>
-              <a href="/tags/%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86/" rel="tag"># 广度优先遍历</a>
               <a href="/tags/%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2%E6%A0%91/" rel="tag"># 深度优先搜索树</a>
           </div>
 

@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-28T14:51:58.986Z</updated>
+  <updated>2022-10-29T12:44:02.800Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>流图的深度优先遍历和广度优先遍历</title>
+    <title>流图的深度优先遍历</title>
     <link href="https://maijun-sec.github.io/2022/10/27/graph-search-basic/"/>
     <id>https://maijun-sec.github.io/2022/10/27/graph-search-basic/</id>
     <published>2022-10-27T14:30:10.000Z</published>
-    <updated>2022-10-28T14:51:58.986Z</updated>
+    <updated>2022-10-29T12:44:02.800Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-流图&quot;&gt;&lt;a href=&quot;#1-流图&quot; class=&quot;headerlink&quot; title=&quot;1. 流图&quot;&gt;&lt;/a&gt;1. 流图&lt;/h2&gt;&lt;p&gt;本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。&lt;/p&gt;
@@ -42,8 +42,6 @@
     <category term="流图" scheme="https://maijun-sec.github.io/tags/%E6%B5%81%E5%9B%BE/"/>
     
     <category term="深度优先遍历" scheme="https://maijun-sec.github.io/tags/%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86/"/>
-    
-    <category term="广度优先遍历" scheme="https://maijun-sec.github.io/tags/%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86/"/>
     
     <category term="深度优先搜索树" scheme="https://maijun-sec.github.io/tags/%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2%E6%A0%91/"/>
     
