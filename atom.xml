@@ -166,11 +166,11 @@
     
     <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
     
+    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
+    
     <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
     <category term="三地址码" scheme="https://maijun-sec.github.io/tags/%E4%B8%89%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
-    
-    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
     
     <category term="BasicBlock" scheme="https://maijun-sec.github.io/tags/BasicBlock/"/>
     
@@ -198,11 +198,9 @@
     
     <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
     
-    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
+    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
     
     <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
-    
-    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
     
     <category term="PDG" scheme="https://maijun-sec.github.io/tags/PDG/"/>
     
@@ -211,6 +209,8 @@
     <category term="DDG" scheme="https://maijun-sec.github.io/tags/DDG/"/>
     
     <category term="SDG" scheme="https://maijun-sec.github.io/tags/SDG/"/>
+    
+    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
   </entry>
   

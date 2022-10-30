@@ -1,6 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>流图的深度优先遍历</title>
+    <url>/2022/10/27/graph-search-basic/</url>
+    <content><![CDATA[<h2 id="1-流图"><a href="#1-流图" class="headerlink" title="1. 流图"></a>1. 流图</h2><p>本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。</p>
+<p>本文介绍的流图具有如下的特点：</p>
+<ul>
+<li>有唯一的 entry 节点</li>
+<li>是一个有向图，并且图中可能有环</li>
+<li>从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点</li>
+</ul>
+<span id="more"></span>
+
+<p>从根节点出发遍历图中的每个节点，并且每个节点仅被访问一次，称为<strong>图的遍历</strong>。 类似与树的遍历，图也有深度优先和广度优先两种遍历方式，不同的是，图中会有环，因此需要对已经访问的节点进行记录，避免重复遍历。</p>
+<p>针对流图的遍历，有两种方式：深度优先遍历和广度优先遍历。</p>
+<h2 id="2-流图深度优先遍历"><a href="#2-流图深度优先遍历" class="headerlink" title="2. 流图深度优先遍历"></a>2. 流图深度优先遍历</h2><h3 id="2-1-深度优先遍历举例介绍"><a href="#2-1-深度优先遍历举例介绍" class="headerlink" title="2.1 深度优先遍历举例介绍"></a>2.1 深度优先遍历举例介绍</h3><p>深度优先遍历所使用的策略，就跟它的名字一样：只要有可能，就会沿着图尽可能地进行“深入”遍历。具体来说，就是遍历到某个节点时，会先沿着这个节点的出边进行尽可能深入地遍历，等遍历结束后，会回溯到上个节点再继续遍历，直到遍历完成。</p>
+<p>下面会举个例子进行介绍，</p>
+<p><img src="/2022/10/27/graph-search-basic/dfs_flowgraph.png"></p>
+<p>如上图(左)，是一个流图，其 entry 为 A 节点（所有的遍历的入口）。</p>
+<p>其深度优先遍历的顺序如 上图(中) 所示：</p>
+<p>我们对遍历顺序进行详细介绍。</p>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>有向图每个节点的出边，一般没有顺序，即不管先遍历哪一个都行</li>
+<li>我们为了方便，每次都是沿着左边进行遍历</li>
+</ul>
+<p>如上图所示，遍历的步骤如下：</p>
+<ul>
+<li>entry 为 A，即 A 为第一个被遍历到，其序号为 1</li>
+<li>A 有两条出边，沿左边的出边遍历，即 B，其序号为 2</li>
+<li>B 有两条出边，沿左边的出边遍历，即 D，其序号为 3</li>
+<li>D 有两条出边，沿左边的出边遍历，即 F，其序号为 4</li>
+<li>F 有两条出边，沿左边的出边遍历，即 I，其序号为 5</li>
+<li>I 只有一条出边，沿该出边遍历，即 L，其序号为 6</li>
+<li>L 有两条出边，但是因为左边的出边为 B，已经遍历到，改沿右边的出边遍历，即 M，其序号为 7</li>
+<li>M 没有出边，此时我们进行回溯，M 回溯到 L，我们发现 L 的两条边都已经遍历到，继续回溯</li>
+<li>回溯到 L，L 只有一条出边，也已经遍历到，继续回溯到 F</li>
+<li>F 有两条出边，其中左边 L 已经被遍历，此时沿右边遍历，即 K，其序号为 8</li>
+<li>K 有一条出边，为 L，但是已经遍历，不再遍历，开始回溯</li>
+<li>回溯到 F，发现 F 的两条出边都已经遍历到，此时继续回溯到 D</li>
+<li>D 有两条出边，其中左边的出边已经遍历到，此时遍历右边的出边，即 G，其序号为 9</li>
+<li>G 只有一条出边，沿该出边遍历，即 J，其序号为 10</li>
+<li>J 有一条出边，但是出边 L 已经被遍历到，不再遍历，开始回溯</li>
+<li>此时，通过反向回溯到 G，再到 D，再到 B，都没有未遍历的边，继续回溯到 A</li>
+<li>A 左边的出边已经遍历，改为遍历右边的出边，即 C，其序号为 11</li>
+<li>C 有两个出边，沿左边的出边遍历，即 E，其序号为 12</li>
+<li>E 有两条出边，但是左边的出边到 C，已经遍历，改为右边的出边，即 H，其序号为 13</li>
+<li>H 有一条出边，但是指向 M，已经遍历到，不再遍历，开始回溯</li>
+<li>H 回溯到 E，E 两条边都已经遍历到，继续回溯到 C，看右边的出边，但是右边的出边也遍历到，不再遍历。</li>
+<li>此时遍历结束。</li>
+</ul>
+<p>就形成了上图(中)，我们标出来的每个节点的遍历的次序。如上图，我们给每个节点都标注了数字，即遍历的顺序。</p>
+<h3 id="2-2-和深度优先遍历相关的几个概念"><a href="#2-2-和深度优先遍历相关的几个概念" class="headerlink" title="2.2 和深度优先遍历相关的几个概念"></a>2.2 和深度优先遍历相关的几个概念</h3><h4 id="2-2-1-dfn序"><a href="#2-2-1-dfn序" class="headerlink" title="2.2.1 dfn序"></a>2.2.1 dfn序</h4><p>如上一节，在通过深度优先遍历遍历图时，对每个节点的遍历顺序按数字排序，例如 A 为 1，H 为 13，这个数字就是该节点的 dfn 序：</p>
+<ul>
+<li>dfn(A) &#x3D; 1</li>
+<li>dfn(H) &#x3D; 13</li>
+</ul>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>在有些资料里面，dfn 序从 0 开始，其实没什么影响，只是起始序号不同</li>
+<li>在有些资料里面，dfn 也命名为 dfnum，大家知道两者一样即可，例如 dfnum(H)&#x3D;13</li>
+</ul>
+<h4 id="2-2-2-深度优先生成树-dfs树"><a href="#2-2-2-深度优先生成树-dfs树" class="headerlink" title="2.2.2 深度优先生成树(dfs树)"></a>2.2.2 深度优先生成树(dfs树)</h4><p>如上一节中，我们在介绍遍历顺序的时候，沿着有效遍历节点，我们通过<strong>绿色粗实线</strong>标注了遍历的关系，我们将图中的红色虚线去除，就形成了一个树状结构，如2.1节中的图(右)</p>
+<p>这是一个树状结构，我们将其称为 <strong>DFS树</strong> 或者是 <strong>深度优先生成树</strong>。</p>
+<p>针对 深度优先生成树，有几点需要说明的情况：</p>
+<ul>
+<li>深度优先生成树不是唯一的，如上例，我们遍历的时候，都是延左边的出边执行的，如果延右边的出边，或者部分延左边的出边，部分延右边的出边，形成的深度优先生成树可能不同；</li>
+<li>深度优先生成树是一棵树，不是图，没有环，因此适用于树的概念：比如祖先、真祖先（如果一个节点v在节点w和根节点之间(包括w和根节点)，则v是w的祖先，如果v和w不同，则v是w的真祖先）；</li>
+<li>如果 v 是 w 的真祖先，则 dfn(v) &lt; dfn(w)</li>
+</ul>
+<h4 id="2-2-3-几种边的类型"><a href="#2-2-3-几种边的类型" class="headerlink" title="2.2.3 几种边的类型"></a>2.2.3 几种边的类型</h4><p>在2.1节中，我们对深度优先遍历举例时，我们主要形成了三类数据：</p>
+<ul>
+<li>和节点在一起的数字，即 dfn 序</li>
+<li>绿色实线边组成的树，即 深度优先生成树</li>
+<li>红色虚线边</li>
+</ul>
+<p>这一节，我们介绍一下红色虚线边，我们将红色虚线边分成三类，大家继续看2.1节中形成的图：</p>
+<ul>
+<li>前向边：将节点 v 连接到 dfs树 中 v 的后代节点 w 的边，如 B-&gt;G，C-&gt;H</li>
+<li>后向边：和前向边相反，是节点 v 连接到 dfs 树中 v 的祖先节点 w 的边，如 L-&gt;B，E-&gt;C</li>
+<li>横向边：其它的在 DFS树 中不存在祖先和后代关系，但是在CFG中有边连接的点的边，如 J-&gt;L，H-&gt;M</li>
+</ul>
+<h2 id="3-深度优先遍历代码举例"><a href="#3-深度优先遍历代码举例" class="headerlink" title="3. 深度优先遍历代码举例"></a>3. 深度优先遍历代码举例</h2><p>我们简单实现一个基于深度优先遍历流图的算法（基于 jgrapht 实现）：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DFSIterator</span>&lt;V&gt; &#123;</span><br><span class="line">    <span class="comment">// 以图的形式创建 DFS树</span></span><br><span class="line">    <span class="keyword">private</span> Graph&lt;V, DefaultEdge&gt; dfsTree;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// dfn序，List形式存储</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;V&gt; iteratorOrder;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 记录已经访问的节点列表</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;V&gt; visited;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DFSIterator</span><span class="params">(Graph&lt;V, DefaultEdge&gt; graph, V entry)</span> &#123;</span><br><span class="line">        iteratorOrder = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(graph.vertexSet().size());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在 DFS树 中添加所有的节点，等后面遍历时，再添加边</span></span><br><span class="line">        dfsTree = <span class="keyword">new</span> <span class="title class_">DefaultDirectedGraph</span>&lt;&gt;(DefaultEdge.class);</span><br><span class="line">        graph.vertexSet().forEach(vertex -&gt; dfsTree.addVertex(vertex));</span><br><span class="line"></span><br><span class="line">        iteratorOrder = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(graph.vertexSet().size());</span><br><span class="line"></span><br><span class="line">        visited = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        dfs(graph, entry, <span class="literal">null</span>, dfsTree, iteratorOrder, visited);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 深度优先遍历流图</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> graph 待遍历的流图</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> curNode 当前正要遍历的节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> preNode 上一个节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dfsTree 深度优先生成树</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> iteratorOrder 节点的遍历顺序，将基于该list获取每个节点的dfn</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> visited 记录节点是否已经完成遍历</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">dfs</span><span class="params">(Graph&lt;V, DefaultEdge&gt; graph, V curNode, V preNode, Graph&lt;V, DefaultEdge&gt; dfsTree, List&lt;V&gt; iteratorOrder, Set&lt;V&gt; visited)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (visited.contains(curNode)) &#123;</span><br><span class="line">            <span class="keyword">return</span>;  <span class="comment">// 如果已经完成遍历，则直接返回</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        visited.add(curNode);  <span class="comment">// 将当前节点放入到已访问节点</span></span><br><span class="line">        iteratorOrder.add(curNode);  <span class="comment">// 将当前节点直接塞到遍历节点序列中，这个序列就表示了节点的遍历顺序</span></span><br><span class="line">        <span class="keyword">if</span> (preNode != <span class="literal">null</span>) &#123;</span><br><span class="line">            dfsTree.addEdge(preNode, curNode);  <span class="comment">// 在 DFS树 中添加边</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 基于深度优先遍历当前节点的子节点</span></span><br><span class="line">        graph.outgoingEdgesOf(curNode).forEach(edge -&gt; &#123;</span><br><span class="line">            dfs(graph, graph.getEdgeTarget(edge), curNode, dfsTree, iteratorOrder, visited);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Graph&lt;V, DefaultEdge&gt; <span class="title function_">getDfsTree</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.dfsTree;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Map&lt;V, Integer&gt; <span class="title function_">getDfn</span><span class="params">()</span> &#123;</span><br><span class="line">        Map&lt;V, Integer&gt; dfn = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 将遍历顺序转成 Map 形式，并且 dfn 下标从 1 开始</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; iteratorOrder.size(); i++) &#123;</span><br><span class="line">            dfn.put(iteratorOrder.get(i), i + <span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dfn;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们通过下面的方式，初始化一个 jgrapht 图（和前面的例子一致），然后使用我们前面创建的深度优先遍历类进行遍历：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DFSIteratorTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 1. 初始化流图</span></span><br><span class="line">        Graph&lt;String, DefaultEdge&gt; graph = initGraph();</span><br><span class="line"></span><br><span class="line">        DFSIterator&lt;String&gt; dfsIterator = <span class="keyword">new</span> <span class="title class_">DFSIterator</span>&lt;&gt;(graph, <span class="string">&quot;A&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">var</span> <span class="variable">dfsTree</span> <span class="operator">=</span> dfsIterator.getDfsTree();</span><br><span class="line">        System.out.println(<span class="string">&quot;====&gt; DFS Tree:&quot;</span>);</span><br><span class="line">        System.out.println(dfsTree);</span><br><span class="line">        </span><br><span class="line">        <span class="type">var</span> <span class="variable">dfn</span> <span class="operator">=</span> dfsIterator.getDfn();</span><br><span class="line">        System.out.println(<span class="string">&quot;====&gt; DFN:&quot;</span>);</span><br><span class="line">        dfn.entrySet().forEach(entry -&gt; System.out.println(entry.getKey() + <span class="string">&quot; -&gt; &quot;</span> + entry.getValue()));</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> DefaultDirectedGraph&lt;String, DefaultEdge&gt; <span class="title function_">initGraph</span><span class="params">()</span> &#123;</span><br><span class="line">        DefaultDirectedGraph&lt;String, DefaultEdge&gt; graph = <span class="keyword">new</span> <span class="title class_">DefaultDirectedGraph</span>&lt;&gt;(DefaultEdge.class);</span><br><span class="line"></span><br><span class="line">        graph.addVertex(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;C&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;D&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;E&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;F&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;G&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;H&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;I&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;J&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;K&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;L&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;M&quot;</span>);</span><br><span class="line"></span><br><span class="line">        graph.addEdge(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;B&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;B&quot;</span>, <span class="string">&quot;G&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;C&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;C&quot;</span>, <span class="string">&quot;H&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;D&quot;</span>, <span class="string">&quot;F&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;D&quot;</span>, <span class="string">&quot;G&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;E&quot;</span>, <span class="string">&quot;H&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;E&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;F&quot;</span>, <span class="string">&quot;I&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;F&quot;</span>, <span class="string">&quot;K&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;G&quot;</span>, <span class="string">&quot;J&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;H&quot;</span>, <span class="string">&quot;M&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;I&quot;</span>, <span class="string">&quot;L&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;J&quot;</span>, <span class="string">&quot;I&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;K&quot;</span>, <span class="string">&quot;L&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;L&quot;</span>, <span class="string">&quot;M&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;L&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> graph;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码，打印出来的 DFS树 和 dfn序 如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">====&gt; DFS Tree:</span><br><span class="line">([A, B, C, D, E, F, G, H, I, J, K, L, M], [(A,B), (B,D), (D,F), (F,I), (I,L), (L,M), (F,K), (D,G), (G,J), (A,C), (C,E), (E,H)])</span><br><span class="line">====&gt; DFN:</span><br><span class="line">A -&gt; 1</span><br><span class="line">B -&gt; 2</span><br><span class="line">C -&gt; 11</span><br><span class="line">D -&gt; 3</span><br><span class="line">E -&gt; 12</span><br><span class="line">F -&gt; 4</span><br><span class="line">G -&gt; 9</span><br><span class="line">H -&gt; 13</span><br><span class="line">I -&gt; 5</span><br><span class="line">J -&gt; 10</span><br><span class="line">K -&gt; 8</span><br><span class="line">L -&gt; 6</span><br><span class="line">M -&gt; 7</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明</strong>：在 jgrapht 中，原本就有实现一个针对通用图的深度优先遍历的算法，大家可以参考：<a href="https://jgrapht.org/javadoc/org.jgrapht.core/org/jgrapht/traverse/DepthFirstIterator.html">DepthFirstIterator</a>。该实现算法跟《算法导论》中的介绍一致（遍历的时候，根据节点遍历情况，分 白色、灰色、黑色），这里不再介绍了。</p>
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p>《算法导论》22.3 节<br>《现代编译原理》19.2 节</p>
+]]></content>
+      <categories>
+        <category>图论</category>
+        <category>流图遍历</category>
+      </categories>
+      <tags>
+        <tag>流图</tag>
+        <tag>深度优先遍历</tag>
+        <tag>深度优先搜索树</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用于静态代码分析的程序表示——AST获取</title>
+    <url>/2022/10/25/program-representation-ast-gen/</url>
+    <content><![CDATA[<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。</p>
+<p>当然，有时候已有的开源工具或者框架对于我们来说可能并不合适，这个时候还是要自己生成的。</p>
+<span id="more"></span>
+
+<h2 id="2-常用的代码-AST-获取或生成方法"><a href="#2-常用的代码-AST-获取或生成方法" class="headerlink" title="2. 常用的代码 AST 获取或生成方法"></a>2. 常用的代码 AST 获取或生成方法</h2><h3 id="2-1-选择已有的开源代码或者框架"><a href="#2-1-选择已有的开源代码或者框架" class="headerlink" title="2.1 选择已有的开源代码或者框架"></a>2.1 选择已有的开源代码或者框架</h3><p>这里，简单介绍一些面向主流语言，常有的一些框架如下：</p>
+<table>
+<thead>
+<tr>
+<th>语言</th>
+<th>开源框架及静态分析工具或编译器</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Java</td>
+<td>JDT、JavaParser、PMD、CheckStyle等</td>
+</tr>
+<tr>
+<td>C&#x2F;C++</td>
+<td>CDT、CppCheck、Clang等</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>Python自带的 ast 模块、Bandit、flake8等</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>Babel、espree、eslint、prettier 等</td>
+</tr>
+</tbody></table>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>Java 的 findbugs 是扫描 class 文件的，没有列在上面；</li>
+<li>针对 JavaParser，有一个介绍，可以参考：<a href="https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/">JavaParser简介及应用</a>，可以使大家对AST有个更直观的认识。</li>
+</ul>
+<p>当我们开发程序分析工具时，需要 AST 的情况下，首选当然是开源代码，可以快速实现开发，快速迭代。但是，如果需要支持多种语言，并且希望针对多种语言，统一 AST 格式，则还是需要自己生成 AST。</p>
+<h3 id="2-2-基于-Antlr4-或者-Java-CC-生成-AST"><a href="#2-2-基于-Antlr4-或者-Java-CC-生成-AST" class="headerlink" title="2.2 基于 Antlr4 或者 Java CC 生成 AST"></a>2.2 基于 Antlr4 或者 Java CC 生成 AST</h3><p>Antlr4是一款基于Java开发的开源的语法分析器生成工具，广泛应用于DSL构建，语言词法语法解析，静态代码分析等领域。</p>
+<p>针对 Antlr4 的介绍和使用，可以参考：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/">Antlr4简明使用教程</a></p>
+<p>该方法应用范围非常广，例如 JavaParser 和 PMD（PMD 中部分非 Java 的语言基于 Antlr4 实现） 都是基于 Java CC 实现的。</p>
+<h4 id="2-2-1-具体语法树和抽象语法树"><a href="#2-2-1-具体语法树和抽象语法树" class="headerlink" title="2.2.1 具体语法树和抽象语法树"></a>2.2.1 具体语法树和抽象语法树</h4><p><font color="red">待补充</font></p>
+<h4 id="2-2-2-从具体语法树到抽象语法树"><a href="#2-2-2-从具体语法树到抽象语法树" class="headerlink" title="2.2.2 从具体语法树到抽象语法树"></a>2.2.2 从具体语法树到抽象语法树</h4><p><font color="red">待补充</font></p>
+<h4 id="2-2-3-token获取"><a href="#2-2-3-token获取" class="headerlink" title="2.2.3 token获取"></a>2.2.3 token获取</h4><p><font color="red">待补充</font></p>
+<h3 id="2-3-基于词法分析生成"><a href="#2-3-基于词法分析生成" class="headerlink" title="2.3 基于词法分析生成"></a>2.3 基于词法分析生成</h3><p>说实话，自己解析 token，然后通过自己实现 上下文无关文法 的解析，然后构造 AST，我还没有做过，这里就先不介绍了，大家可以参考部分编译器（例如 clang）的实现，或者看看 Antlr4 的源码。以后我要是做到了这部分工作，我再回来补充。</p>
+<h2 id="3-AST-的遍历"><a href="#3-AST-的遍历" class="headerlink" title="3. AST 的遍历"></a>3. AST 的遍历</h2><p>针对 AST 的遍历，主要是两种设计模式：访问者设计模式 和 监听者设计模式</p>
+<p>针对这两部分，可以参考下面的两个博客：</p>
+<ul>
+<li>Antlr4 的遍历：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/">Antlr4简明使用教程</a></li>
+<li>一个访问者模式的介绍，并且结合具体例子介绍：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/">访问者模式及其在 Java Parser 中的应用</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+        <category>AST解析与操作</category>
+      </categories>
+      <tags>
+        <tag>AST</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【转载】Antlr4简明使用教程</title>
     <url>/2022/10/26/program-representation-antlr-basic/</url>
     <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 华为云bbs 上的原创文章，原文链接是：<a href="https://bbs.huaweicloud.com/blogs/226877">https://bbs.huaweicloud.com/blogs/226877</a></p>
@@ -119,56 +283,114 @@
       </tags>
   </entry>
   <entry>
-    <title>用于静态代码分析的程序表示——AST获取</title>
-    <url>/2022/10/25/program-representation-ast-gen/</url>
-    <content><![CDATA[<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>我们这里，标题用 AST获取，而不是 AST生成，主要目的在于，我们在开发静态代码分析工具时，应该善于利用已有的开源工具或者框架，避免重复造轮子，期望采用最少的投入获得最大的回报。</p>
-<p>当然，有时候已有的开源工具或者框架对于我们来说可能并不合适，这个时候还是要自己生成的。</p>
+    <title>【转载】JavaParser应用介绍</title>
+    <url>/2022/10/25/program-representation-javaparser-intro/</url>
+    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96">https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96</a></p>
+<h2 id="0-Java-Parser-基本信息"><a href="#0-Java-Parser-基本信息" class="headerlink" title="0. Java Parser 基本信息"></a>0. Java Parser 基本信息</h2><p>Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。</p>
+<p>Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。</p>
 <span id="more"></span>
 
-<h2 id="2-常用的代码-AST-获取或生成方法"><a href="#2-常用的代码-AST-获取或生成方法" class="headerlink" title="2. 常用的代码 AST 获取或生成方法"></a>2. 常用的代码 AST 获取或生成方法</h2><h3 id="2-1-选择已有的开源代码或者框架"><a href="#2-1-选择已有的开源代码或者框架" class="headerlink" title="2.1 选择已有的开源代码或者框架"></a>2.1 选择已有的开源代码或者框架</h3><p>这里，简单介绍一些面向主流语言，常有的一些框架如下：</p>
-<table>
-<thead>
-<tr>
-<th>语言</th>
-<th>开源框架及静态分析工具或编译器</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Java</td>
-<td>JDT、JavaParser、PMD、CheckStyle等</td>
-</tr>
-<tr>
-<td>C&#x2F;C++</td>
-<td>CDT、CppCheck、Clang等</td>
-</tr>
-<tr>
-<td>Python</td>
-<td>Python自带的 ast 模块、Bandit、flake8等</td>
-</tr>
-<tr>
-<td>JavaScript</td>
-<td>Babel、espree、eslint、prettier 等</td>
-</tr>
-</tbody></table>
-<p><strong>说明</strong>：</p>
+<p>Java Parser 的组件架构（<a href="https://javaparser.org/code-style-architecture/%EF%BC%89%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%EF%BC%9A">https://javaparser.org/code-style-architecture/）如下图所示：</a></p>
+<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser.png"></p>
+<center>图 0-1 Java Parser 组件架构</center>
+
+<p>本文讨论 Java Parser 面向 Java 规范检查方向的一些内容，因此我们不关心 Java Parser 在修改 AST 和重新生成 Java 文件方面的作用，着重介绍在生成 AST、AST 遍历、解析、类型推断及应用。</p>
+<p>说明：本文中所有的代码的完成代码，可以参考<a href="https://gitee.com/maijun/javaparser-test/tree/master">https://gitee.com/maijun/javaparser-test/tree/master</a>(<font color="red">暂时下线，待优化上线</font>)。</p>
+<h2 id="1-Java-Parser-AST-生成及打印"><a href="#1-Java-Parser-AST-生成及打印" class="headerlink" title="1. Java Parser AST 生成及打印"></a>1. Java Parser AST 生成及打印</h2><h3 id="1-1-Java-Parser-生成-AST"><a href="#1-1-Java-Parser-生成-AST" class="headerlink" title="1.1 Java Parser 生成 AST"></a>1.1 Java Parser 生成 AST</h3><p>Java Parser 转换生成 AST，有很多方法，主要支持两大类方式：</p>
+<h4 id="1-输入为文件"><a href="#1-输入为文件" class="headerlink" title="1) 输入为文件"></a>1) 输入为文件</h4><p>输入为文件，即针对完整的文件为输入，生成整个文件的 AST（对于 Java 来说，如果是整个 Java 文件，AST 的根节点为 CompilationUnit），这种方式，可以完整保留源码的代码行信息，这样方便进行分析。对于文件为输入，即输入文件路径（多种写法，例如 String、File、Path、Resource 等，其实都是表示文件路径），同时可以指定文件的编码方式，下面的用例，指定的是 nio 的 Path 格式的路径。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 转换的是完整的Java文件</span></span><br><span class="line"><span class="type">File</span> <span class="variable">base</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">relativePath</span> <span class="operator">=</span> <span class="string">&quot;test-case/javaparser-testcase/src/main/java/zmj/test/thread/MyThread.java&quot;</span>;</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> base.getCanonicalPath() + File.separator + relativePath;</span><br><span class="line">ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(Paths.get(absolutePath));</span><br><span class="line">result.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-输入为代码片段"><a href="#2-输入为代码片段" class="headerlink" title="2) 输入为代码片段"></a>2) 输入为代码片段</h4><p>输入为代码片段时，一定要是一种标准的符合一定格式的能够识别为语句或者表达式的代码片段，例如 <code>int x</code> 是一个 VariableDeclarationExpr，<code>x = 3</code> 是一个 AssignExpr，但是，如果代码片段写成 <code>x + 3 = y</code>，则不符合基本的 Java 的语法。</p>
+<p>下面是一个基本的关于这种用法的例子（如果要看完整支持的功能，可以看 Java Parser 的 API 文档）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 2. 转换的为部分代码片段</span></span><br><span class="line">ParseResult&lt;VariableDeclarationExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseVariableDeclarationExpr(<span class="string">&quot;int x = 3&quot;</span>);</span><br><span class="line">System.out.println(exprResult.getResult().get());</span><br><span class="line">exprResult.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
+
+<p>事实上，我们可以将完整的 Java 文件内容都读到一个字符串里面，然后传递给 Java Parser，来获取 AST，即针对完整的 Java 文件，以代码片段的方式来解析获取 AST，这样也是可以的。但是我们不推荐这样做，因为直接传递文件，可以保留完整的代码行信息，但是传递的如果是代码片段，则代码行信息被丢失掉了。</p>
+<h3 id="1-2-Java-Parser-AST-打印"><a href="#1-2-Java-Parser-AST-打印" class="headerlink" title="1.2 Java Parser AST 打印"></a>1.2 Java Parser AST 打印</h3><p>Java Parser AST 打印有多种方式，当前支持三种打印方式：Yaml、XML 和 Graphiz 可以识别的 dot 的图片生成的格式。</p>
+<p>如下面的代码所示，我们针对一个简单的语句（<code>x = 3 + 4</code>），生成了 Yaml、XML 和 Graphiz dot 的输出：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AstPrinter</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        ParseResult&lt;AssignExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseExpression(<span class="string">&quot;x = 3 + 4&quot;</span>);</span><br><span class="line">        Optional&lt;AssignExpr&gt; expr = exprResult.getResult();</span><br><span class="line">        <span class="comment">// 1. Yaml格式输出打印</span></span><br><span class="line">        expr.ifPresent(YamlPrinter::print);</span><br><span class="line">        <span class="comment">// 2. XML格式输出打印</span></span><br><span class="line">        expr.ifPresent(XmlPrinter::print);</span><br><span class="line">        <span class="comment">// 3. dot打印(可以通过Graphiz dot命令，将输出生成为图片格式，例如 dot -Tpng ast.dot &gt; ast.png)</span></span><br><span class="line">        expr.ifPresent(e -&gt; System.out.println(<span class="keyword">new</span> <span class="title class_">DotPrinter</span>(<span class="literal">true</span>).output(e)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-Yaml-格式输出"><a href="#1-Yaml-格式输出" class="headerlink" title="1) Yaml 格式输出"></a>1) Yaml 格式输出</h4><p>输出的 Yaml 格式如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">root(Type=AssignExpr):</span></span><br><span class="line">    <span class="attr">operator:</span> <span class="string">&quot;ASSIGN&quot;</span></span><br><span class="line">    <span class="string">target(Type=NameExpr):</span></span><br><span class="line">        <span class="string">name(Type=SimpleName):</span></span><br><span class="line">        <span class="attr">identifier:</span> <span class="string">&quot;x&quot;</span></span><br><span class="line">    <span class="string">value(Type=BinaryExpr):</span></span><br><span class="line">        <span class="attr">operator:</span> <span class="string">&quot;PLUS&quot;</span></span><br><span class="line">        <span class="string">left(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">        <span class="string">right(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;4&quot;</span></span><br><span class="line"><span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-XML-格式输出"><a href="#2-XML-格式输出" class="headerlink" title="2) XML 格式输出"></a>2) XML 格式输出</h4><p>输出的 XML 格式如下（原始输出是只有一个字符串，这里我简单进行了处理，添加了换行和缩进）：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">root</span> <span class="attr">type</span>=<span class="string">&#x27;AssignExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;ASSIGN&#x27;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">target</span> <span class="attr">type</span>=<span class="string">&#x27;NameExpr&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">name</span> <span class="attr">type</span>=<span class="string">&#x27;SimpleName&#x27;</span> <span class="attr">identifier</span>=<span class="string">&#x27;x&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">value</span> <span class="attr">type</span>=<span class="string">&#x27;BinaryExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;PLUS&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">left</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;3&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">left</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">right</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;4&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">right</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-Graphiz-dot-输出"><a href="#3-Graphiz-dot-输出" class="headerlink" title="3) Graphiz dot 输出"></a>3) Graphiz dot 输出</h4><p>首先打印的内容如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">digraph &#123;</span><br><span class="line">n0 [label=&quot;root (AssignExpr)&quot;];</span><br><span class="line">n1 [label=&quot;operator=&#x27;ASSIGN&#x27;&quot;];</span><br><span class="line">n0 -&gt; n1;</span><br><span class="line">n2 [label=&quot;target (NameExpr)&quot;];</span><br><span class="line">n0 -&gt; n2;</span><br><span class="line">n3 [label=&quot;name (SimpleName)&quot;];</span><br><span class="line">n2 -&gt; n3;</span><br><span class="line">n4 [label=&quot;identifier=&#x27;x&#x27;&quot;];</span><br><span class="line">n3 -&gt; n4;</span><br><span class="line">n5 [label=&quot;value (BinaryExpr)&quot;];</span><br><span class="line">n0 -&gt; n5;</span><br><span class="line">n6 [label=&quot;operator=&#x27;PLUS&#x27;&quot;];</span><br><span class="line">n5 -&gt; n6;</span><br><span class="line">n7 [label=&quot;left (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n7;</span><br><span class="line">n8 [label=&quot;value=&#x27;3&#x27;&quot;];</span><br><span class="line">n7 -&gt; n8;</span><br><span class="line">n9 [label=&quot;right (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n9;</span><br><span class="line">n10 [label=&quot;value=&#x27;4&#x27;&quot;];</span><br><span class="line">n9 -&gt; n10;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将上面的内容写入 ast.dot 文件中，使用命令 dot -Tpng ast.dot &gt; ast.png 即可得到一个图片，如下：</p>
+<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser-dot.png"></p>
+<p>差不多算是一个 AST 的树状结构的一个样子了。</p>
+<h2 id="2-Java-Parser-AST-遍历"><a href="#2-Java-Parser-AST-遍历" class="headerlink" title="2. Java Parser AST 遍历"></a>2. Java Parser AST 遍历</h2><p>在 Java Parser 中，AST 的遍历采用的是访问者模式，在访问者模式的基础上，增加了一个简单的包装器（这里就不再介绍什么是访问者模式和包装器模式了，在另外一篇文章里面，有关于访问者模式的详细介绍）。下面代码中定义了两个非常简单的 visitor，其中一个访问函数调用表达式，打印所有的函数调用的代码，第二个访问所有的函数定义信息，将当前类中定义的函数都打印出来。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TestVisitor</span> <span class="keyword">extends</span> <span class="title class_">GenericVisitorAdapter</span>&lt;Void, Void&gt; &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodCallExpr n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function call: &quot;</span> + n.toString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodDeclaration n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function declaration: &quot;</span> + n.getNameAsString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：一个非常重要的地方，每个 visit 方法写完，都需要调用 <code>super.visit(n,arg)</code>; 因为在基类是一个包装器，实现了节点的遍历，如果不调用，当前节点处理完，程序就结束了。</p>
+<h2 id="3-Java-Parser-类型推断"><a href="#3-Java-Parser-类型推断" class="headerlink" title="3. Java Parser 类型推断"></a>3. Java Parser 类型推断</h2><h4 id="3-1-Symbol-Solver"><a href="#3-1-Symbol-Solver" class="headerlink" title="3.1 Symbol Solver"></a>3.1 Symbol Solver</h4><p>在 Java 中，所有的 Name 等都被称为 Symbol，包括变量、类型、方法等。一般提到类型推断，就是对 Symbol 的操作。所以我们这里提一下 Symbol Solver，因为所有的 Type Solver 都是针对特定的 Symbol 工作的（即 TypeSolver 需要封装在 SymbolSolver 中才能工作）。</p>
+<h4 id="3-2-Type-Solver"><a href="#3-2-Type-Solver" class="headerlink" title="3.2 Type Solver"></a>3.2 Type Solver</h4><p>Java Parser 类型推断有多种类型推断方式，如下表：</p>
 <ul>
-<li>Java 的 findbugs 是扫描 class 文件的，没有列在上面；</li>
-<li>针对 JavaParser，有一个介绍，可以参考：<a href="https://maijun-sec.github.io/2022/10/25/program-representation-javaparser-intro/">JavaParser简介及应用</a>，可以使大家对AST有个更直观的认识。</li>
+<li>AarTypeSolver: 在 Android aar 文件中查找特定的类型;</li>
+<li>ClassLoaderTypeSolver: 针对自定义的 ClassLoader 使用，可以处理由该 ClassLoader 加载的类，这种类型在静态代码分析中很少用到;</li>
+<li>CombinedTypeSolver: 可以封装多个 Type Solver 一起使用</li>
+<li>JarTypeSolver: 在 Jar 文件中，查找特定的类型</li>
+<li>JavaParserTypeSolver: 在源码中查找特定的类型，只需要传递源码根路径即可</li>
+<li>MemoryTypeSolver: 一般不需要使用，可以在测试中使用</li>
+<li>ReflectionTypeSolver: 用来处理应用 classpath 里面的类，一般用于处理 JRE 中的类</li>
 </ul>
-<p>当我们开发程序分析工具时，需要 AST 的情况下，首选当然是开源代码，可以快速实现开发，快速迭代。但是，如果需要支持多种语言，并且希望针对多种语言，统一 AST 格式，则还是需要自己生成 AST。</p>
-<h3 id="2-2-基于-Antlr4-或者-Java-CC-生成-AST"><a href="#2-2-基于-Antlr4-或者-Java-CC-生成-AST" class="headerlink" title="2.2 基于 Antlr4 或者 Java CC 生成 AST"></a>2.2 基于 Antlr4 或者 Java CC 生成 AST</h3><p>Antlr4是一款基于Java开发的开源的语法分析器生成工具，广泛应用于DSL构建，语言词法语法解析，静态代码分析等领域。</p>
-<p>针对 Antlr4 的介绍和使用，可以参考：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/">Antlr4简明使用教程</a></p>
-<p>该方法应用范围非常广，例如 JavaParser 和 PMD（PMD 中部分非 Java 的语言基于 Antlr4 实现） 都是基于 Java CC 实现的。</p>
-<h4 id="2-2-1-具体语法树和抽象语法树"><a href="#2-2-1-具体语法树和抽象语法树" class="headerlink" title="2.2.1 具体语法树和抽象语法树"></a>2.2.1 具体语法树和抽象语法树</h4><p><font color="red">待补充</font></p>
-<h4 id="2-2-2-从具体语法树到抽象语法树"><a href="#2-2-2-从具体语法树到抽象语法树" class="headerlink" title="2.2.2 从具体语法树到抽象语法树"></a>2.2.2 从具体语法树到抽象语法树</h4><p><font color="red">待补充</font></p>
-<h4 id="2-2-3-token获取"><a href="#2-2-3-token获取" class="headerlink" title="2.2.3 token获取"></a>2.2.3 token获取</h4><p><font color="red">待补充</font></p>
-<h3 id="2-3-基于词法分析生成"><a href="#2-3-基于词法分析生成" class="headerlink" title="2.3 基于词法分析生成"></a>2.3 基于词法分析生成</h3><p>说实话，自己解析 token，然后通过自己实现 上下文无关文法 的解析，然后构造 AST，我还没有做过，这里就先不介绍了，大家可以参考部分编译器（例如 clang）的实现，或者看看 Antlr4 的源码。以后我要是做到了这部分工作，我再回来补充。</p>
-<h2 id="3-AST-的遍历"><a href="#3-AST-的遍历" class="headerlink" title="3. AST 的遍历"></a>3. AST 的遍历</h2><p>针对 AST 的遍历，主要是两种设计模式：访问者设计模式 和 监听者设计模式</p>
-<p>针对这两部分，可以参考下面的两个博客：</p>
+<p>下面介绍一个简单的例子（这个是一个简单的 maven 工程，但是为了测试 jar 的依赖，我先收集所有依赖的 jar 到项目下面的一个路径下，执行的命令为：<code>mvn dependency:copy-dependencies -DoutputDirectory=lib</code>）。</p>
+<p>这一个普通的 Java 应用，需要处理的类型有三个来源：① 当前自己工程中定义；② 当前工程的第三方依赖；③ JRE 中的基本类型。对应上面的 JavaParserTypeSolver，JarTypeSolver 和 ReflectionTypeSolver，组合成一个 CombinedTypeSolver，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> CombinedTypeSolver <span class="title function_">generateTypeSolver</span><span class="params">(String sourcePath, String libPath)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">CombinedTypeSolver</span> <span class="variable">solver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CombinedTypeSolver</span>();</span><br><span class="line">    <span class="comment">// 1. JavaParserTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">JavaParserTypeSolver</span>(sourcePath));</span><br><span class="line">    <span class="comment">// 2. JarTypeSolver</span></span><br><span class="line">    <span class="type">FindFileVisitor</span> <span class="variable">findJarVisitor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FindFileVisitor</span>(<span class="string">&quot;.jar&quot;</span>);</span><br><span class="line">    Files.walkFileTree(Paths.get(libPath), findJarVisitor);</span><br><span class="line">    <span class="keyword">for</span> (String name : findJarVisitor.getFileNameList()) &#123;</span><br><span class="line">        solver.add(<span class="keyword">new</span> <span class="title class_">JarTypeSolver</span>(name));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 3. ReflectionTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">ReflectionTypeSolver</span>());</span><br><span class="line">    <span class="keyword">return</span> solver;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后构造的 TypeSolver 传递给 JavaParser：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">TypeSolver</span> <span class="variable">typeSolver</span> <span class="operator">=</span> generateTypeSolver(base.getCanonicalPath() + File.separator + sourcePath,</span><br><span class="line">                            base.getCanonicalPath() + File.separator + libPath);</span><br><span class="line"><span class="type">JavaSymbolSolver</span> <span class="variable">symbolSolver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaSymbolSolver</span>(typeSolver);</span><br><span class="line"><span class="type">ParserConfiguration</span> <span class="variable">configuration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ParserConfiguration</span>();</span><br><span class="line">configuration.setSymbolResolver(symbolSolver);</span><br><span class="line"><span class="type">JavaParser</span> <span class="variable">parser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaParser</span>(configuration);</span><br></pre></td></tr></table></figure>
+
+<p>下面介绍三类主要的类型处理内容：</p>
 <ul>
-<li>Antlr4 的遍历：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-antlr-basic/">Antlr4简明使用教程</a></li>
-<li>一个访问者模式的介绍，并且结合具体例子介绍：<a href="https://maijun-sec.github.io/2022/10/26/program-representation-visitor/">访问者模式及其在 Java Parser 中的应用</a></li>
+<li>对变量（表达式）类型的推断</li>
 </ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析变量的类型定义</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve variable type&quot;</span>);</span><br><span class="line">mce.getScope().ifPresent(expression -&gt; &#123;</span><br><span class="line">    <span class="type">ResolvedType</span> <span class="variable">resolvedType</span> <span class="operator">=</span> expression.calculateResolvedType();</span><br><span class="line">    System.out.println(expression.toString() + <span class="string">&quot; is a: &quot;</span> + resolvedType);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>用例的部分结果输出：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">System.out is a: ReferenceType&#123;java.io.PrintStream, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">m is a: ReferenceType&#123;zmj.test.thread.MyThread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">HashBasedTable is a: ReferenceType&#123;com.google.common.collect.HashBasedTable, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.HashBasedTable.V=TypeVariable &#123;JavassistTypeParameter&#123;V&#125;&#125;, com.google.common.collect.HashBasedTable.R=TypeVariable &#123;JavassistTypeParameter&#123;R&#125;&#125;, com.google.common.collect.HashBasedTable.C=TypeVariable &#123;JavassistTypeParameter&#123;C&#125;&#125;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">tt is a: ReferenceType&#123;com.google.common.collect.Table, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.Table.C=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.V=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.R=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上，可以计算诸如表达式（System.out）、变量（m，tt）、静态类（HashBasedTable）等的类型，而且支持第三方库的类型推断（HashBasedTable 为 google guava 库中的类型）。</p>
+<ul>
+<li>对函数签名的推断</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析函数调用的函数声明</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve method declaration&quot;</span>);</span><br><span class="line"><span class="type">JavaParserFacade</span> <span class="variable">javaParserFacade</span> <span class="operator">=</span> JavaParserFacade.get(typeSolver);</span><br><span class="line">SymbolReference&lt;ResolvedMethodDeclaration&gt; resolvedMethodDeclarationSymbolReference = javaParserFacade.solve(mce);</span><br><span class="line">System.out.println(<span class="string">&quot;is resolved: &quot;</span> + resolvedMethodDeclarationSymbolReference.isSolved());</span><br><span class="line">System.out.println(<span class="string">&quot;resolved type&quot;</span> + resolvedMethodDeclarationSymbolReference.getCorrespondingDeclaration());</span><br></pre></td></tr></table></figure>
+
+<p>如上，为了对函数签名进行推断，需要先构造出来一个 JavaParserFacade 对象，也是通过 typeSolver 构造出来的。上面的部分输出如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public void java.io.PrintStream.println(java.lang.String)&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public synchronized void java.lang.Thread.start()&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@6c8156fd[public static create ()Lcom/google/common/collect/HashBasedTable;]&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@f9f9cbbc[public abstract put (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上所示，对函数签名推断得非常准确，包括静态方法和实例方法，抽象、函数形参类型、返回值类型、函数所在的类等，都推断得非常准确。</p>
+<ul>
+<li>对类继承关系推断</li>
+</ul>
+<p>如下的代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析类的继承关系</span></span><br><span class="line">System.out.println(<span class="string">&quot;---- resolve class extend relation&quot;</span>);</span><br><span class="line">cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cid -&gt; &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;current class: &quot;</span> + cid.getFullyQualifiedName().get());</span><br><span class="line">    NodeList&lt;ClassOrInterfaceType&gt; superTypes = cid.getExtendedTypes();</span><br><span class="line">    superTypes.forEach(type -&gt; System.out.println(<span class="string">&quot;super class: &quot;</span> + type.resolve()));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.App</span><br><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.thread.MyThread</span><br><span class="line">super class: ReferenceType&#123;java.lang.Thread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当前只定义了两个类，一个是 App，没有定义父类（直接就是 Object），没有打印，MyThread 是一个线程，获取到了父类的类型。</p>
+<h2 id="4-Java-Parser-简单应用"><a href="#4-Java-Parser-简单应用" class="headerlink" title="4. Java Parser 简单应用"></a>4. Java Parser 简单应用</h2><h3 id="4-1-源码间依赖关系分析"><a href="#4-1-源码间依赖关系分析" class="headerlink" title="4.1 源码间依赖关系分析"></a>4.1 源码间依赖关系分析</h3><p>如第 3.2 节中介绍的例子，可以非常方便地基于类型推断获取如下信息：</p>
+<ul>
+<li>当前类的父类或者父接口，并递归获取所有的父类和父接口；</li>
+<li>获取当前所调用函数的 signature（函数签名，包含可以唯一识别一个方法的所有信息，例如所在的类、名字、形参类型列表、返回值类型），从而拿到函数调用关系；</li>
+</ul>
+<p>另外，再结合源码文件和 Java 类定义的对应关系，可以很方便地构造出工程的 CG 图，识别出源码之间的依赖关系分析。</p>
+<h3 id="4-2-Java-代码度量"><a href="#4-2-Java-代码度量" class="headerlink" title="4.2 Java 代码度量"></a>4.2 Java 代码度量</h3><p>实际上，基于 Java Parser 获得的 AST 信息，辅助类型推断特性，可以实现针对源代码的各种度量内容。可以参考<a href="https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508%EF%BC%8C">https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508，</a> 查看常见的代码度量项。针对其中 3.1 所列出的所有的项都可以度量。</p>
+<p>常见的一些度量项：</p>
+<ul>
+<li><p>针对函数：圈复杂度、代码深度、各类代码行信息、调用函数数量、被调用次数、其他诸如入参个数…；</p>
+</li>
+<li><p>针对文件：总代码行、空行、注释行、非空非注释行、代码注释密度…；</p>
+</li>
+<li><p>针对工程：文件总数、代码行总数、平均代码行…</p>
+</li>
+</ul>
+<p>基于 Java Parser 可以很好地进行实现，而且大部分都不需要完整的依赖信息，可以方便地进行度量。</p>
+<h3 id="4-3-Java-规范支持检查"><a href="#4-3-Java-规范支持检查" class="headerlink" title="4.3 Java 规范支持检查"></a>4.3 Java 规范支持检查</h3><p>当前，针对各类规范支持，可以在不同的层面上进行支持，例如直接对源码检查、对解析得到的 Token 进行检查、对 AST 进行检查、在 CFG 和 CG 上进行数据流检查和各种形式化检查等。</p>
+<p>基于 Java Parser，可以实现在 AST 及源码（可以直接读取源码信息）、Token（从 AST 的节点可以获取当前 AST Node 中的所有的 Token）相结合的所有检查。</p>
+<p>例如，PMD 主要是在 AST 上进行的检查，CheckStyle 主要是在 Token 和 AST 上进行的检查，结合类型推断的支持，Java Parser 可以实现比 PMD 和 CheckStyle 更精确的检查。</p>
 ]]></content>
       <categories>
         <category>程序分析</category>
@@ -176,110 +398,56 @@
         <category>AST解析与操作</category>
       </categories>
       <tags>
-        <tag>AST</tag>
+        <tag>JavaParser</tag>
       </tags>
   </entry>
   <entry>
-    <title>流图的深度优先遍历</title>
-    <url>/2022/10/27/graph-search-basic/</url>
-    <content><![CDATA[<h2 id="1-流图"><a href="#1-流图" class="headerlink" title="1. 流图"></a>1. 流图</h2><p>本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。</p>
-<p>本文介绍的流图具有如下的特点：</p>
-<ul>
-<li>有唯一的 entry 节点</li>
-<li>是一个有向图，并且图中可能有环</li>
-<li>从 entry 出发，顺着边可以直接或者间接到达程序中的所有的节点</li>
-</ul>
+    <title>用于静态代码分析的程序表示——概述</title>
+    <url>/2022/10/24/program-representation/</url>
+    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
+<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
 <span id="more"></span>
 
-<p>从根节点出发遍历图中的每个节点，并且每个节点仅被访问一次，称为<strong>图的遍历</strong>。 类似与树的遍历，图也有深度优先和广度优先两种遍历方式，不同的是，图中会有环，因此需要对已经访问的节点进行记录，避免重复遍历。</p>
-<p>针对流图的遍历，有两种方式：深度优先遍历和广度优先遍历。</p>
-<h2 id="2-流图深度优先遍历"><a href="#2-流图深度优先遍历" class="headerlink" title="2. 流图深度优先遍历"></a>2. 流图深度优先遍历</h2><h3 id="2-1-深度优先遍历举例介绍"><a href="#2-1-深度优先遍历举例介绍" class="headerlink" title="2.1 深度优先遍历举例介绍"></a>2.1 深度优先遍历举例介绍</h3><p>深度优先遍历所使用的策略，就跟它的名字一样：只要有可能，就会沿着图尽可能地进行“深入”遍历。具体来说，就是遍历到某个节点时，会先沿着这个节点的出边进行尽可能深入地遍历，等遍历结束后，会回溯到上个节点再继续遍历，直到遍历完成。</p>
-<p>下面会举个例子进行介绍，</p>
-<p><img src="/2022/10/27/graph-search-basic/dfs_flowgraph.png"></p>
-<p>如上图(左)，是一个流图，其 entry 为 A 节点（所有的遍历的入口）。</p>
-<p>其深度优先遍历的顺序如 上图(中) 所示：</p>
-<p>我们对遍历顺序进行详细介绍。</p>
-<p><strong>说明</strong>：</p>
+<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
+<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
+<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
+<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
+<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
+<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
+<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
+<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
+<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
+<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
 <ul>
-<li>有向图每个节点的出边，一般没有顺序，即不管先遍历哪一个都行</li>
-<li>我们为了方便，每次都是沿着左边进行遍历</li>
+<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
+<li>AST 的生成方式和获取，请参考 <a href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">用于静态代码分析的程序表示——AST获取</a>。</li>
+<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
 </ul>
-<p>如上图所示，遍历的步骤如下：</p>
+<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
 <ul>
-<li>entry 为 A，即 A 为第一个被遍历到，其序号为 1</li>
-<li>A 有两条出边，沿左边的出边遍历，即 B，其序号为 2</li>
-<li>B 有两条出边，沿左边的出边遍历，即 D，其序号为 3</li>
-<li>D 有两条出边，沿左边的出边遍历，即 F，其序号为 4</li>
-<li>F 有两条出边，沿左边的出边遍历，即 I，其序号为 5</li>
-<li>I 只有一条出边，沿该出边遍历，即 L，其序号为 6</li>
-<li>L 有两条出边，但是因为左边的出边为 B，已经遍历到，改沿右边的出边遍历，即 M，其序号为 7</li>
-<li>M 没有出边，此时我们进行回溯，M 回溯到 L，我们发现 L 的两条边都已经遍历到，继续回溯</li>
-<li>回溯到 L，L 只有一条出边，也已经遍历到，继续回溯到 F</li>
-<li>F 有两条出边，其中左边 L 已经被遍历，此时沿右边遍历，即 K，其序号为 8</li>
-<li>K 有一条出边，为 L，但是已经遍历，不再遍历，开始回溯</li>
-<li>回溯到 F，发现 F 的两条出边都已经遍历到，此时继续回溯到 D</li>
-<li>D 有两条出边，其中左边的出边已经遍历到，此时遍历右边的出边，即 G，其序号为 9</li>
-<li>G 只有一条出边，沿该出边遍历，即 J，其序号为 10</li>
-<li>J 有一条出边，但是出边 L 已经被遍历到，不再遍历，开始回溯</li>
-<li>此时，通过反向回溯到 G，再到 D，再到 B，都没有未遍历的边，继续回溯到 A</li>
-<li>A 左边的出边已经遍历，改为遍历右边的出边，即 C，其序号为 11</li>
-<li>C 有两个出边，沿左边的出边遍历，即 E，其序号为 12</li>
-<li>E 有两条出边，但是左边的出边到 C，已经遍历，改为右边的出边，即 H，其序号为 13</li>
-<li>H 有一条出边，但是指向 M，已经遍历到，不再遍历，开始回溯</li>
-<li>H 回溯到 E，E 两条边都已经遍历到，继续回溯到 C，看右边的出边，但是右边的出边也遍历到，不再遍历。</li>
-<li>此时遍历结束。</li>
+<li>涉及到这两个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
+<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
 </ul>
-<p>就形成了上图(中)，我们标出来的每个节点的遍历的次序。如上图，我们给每个节点都标注了数字，即遍历的顺序。</p>
-<h3 id="2-2-和深度优先遍历相关的几个概念"><a href="#2-2-和深度优先遍历相关的几个概念" class="headerlink" title="2.2 和深度优先遍历相关的几个概念"></a>2.2 和深度优先遍历相关的几个概念</h3><h4 id="2-2-1-dfn序"><a href="#2-2-1-dfn序" class="headerlink" title="2.2.1 dfn序"></a>2.2.1 dfn序</h4><p>如上一节，在通过深度优先遍历遍历图时，对每个节点的遍历顺序按数字排序，例如 A 为 1，H 为 13，这个数字就是该节点的 dfn 序：</p>
-<ul>
-<li>dfn(A) &#x3D; 1</li>
-<li>dfn(H) &#x3D; 13</li>
-</ul>
-<p><strong>说明</strong>：</p>
-<ul>
-<li>在有些资料里面，dfn 序从 0 开始，其实没什么影响，只是起始序号不同</li>
-<li>在有些资料里面，dfn 也命名为 dfnum，大家知道两者一样即可，例如 dfnum(H)&#x3D;13</li>
-</ul>
-<h4 id="2-2-2-深度优先生成树-dfs树"><a href="#2-2-2-深度优先生成树-dfs树" class="headerlink" title="2.2.2 深度优先生成树(dfs树)"></a>2.2.2 深度优先生成树(dfs树)</h4><p>如上一节中，我们在介绍遍历顺序的时候，沿着有效遍历节点，我们通过<strong>绿色粗实线</strong>标注了遍历的关系，我们将图中的红色虚线去除，就形成了一个树状结构，如2.1节中的图(右)</p>
-<p>这是一个树状结构，我们将其称为 <strong>DFS树</strong> 或者是 <strong>深度优先生成树</strong>。</p>
-<p>针对 深度优先生成树，有几点需要说明的情况：</p>
-<ul>
-<li>深度优先生成树不是唯一的，如上例，我们遍历的时候，都是延左边的出边执行的，如果延右边的出边，或者部分延左边的出边，部分延右边的出边，形成的深度优先生成树可能不同；</li>
-<li>深度优先生成树是一棵树，不是图，没有环，因此适用于树的概念：比如祖先、真祖先（如果一个节点v在节点w和根节点之间(包括w和根节点)，则v是w的祖先，如果v和w不同，则v是w的真祖先）；</li>
-<li>如果 v 是 w 的真祖先，则 dfn(v) &lt; dfn(w)</li>
-</ul>
-<h4 id="2-2-3-几种边的类型"><a href="#2-2-3-几种边的类型" class="headerlink" title="2.2.3 几种边的类型"></a>2.2.3 几种边的类型</h4><p>在2.1节中，我们对深度优先遍历举例时，我们主要形成了三类数据：</p>
-<ul>
-<li>和节点在一起的数字，即 dfn 序</li>
-<li>绿色实线边组成的树，即 深度优先生成树</li>
-<li>红色虚线边</li>
-</ul>
-<p>这一节，我们介绍一下红色虚线边，我们将红色虚线边分成三类，大家继续看2.1节中形成的图：</p>
-<ul>
-<li>前向边：将节点 v 连接到 dfs树 中 v 的后代节点 w 的边，如 B-&gt;G，C-&gt;H</li>
-<li>后向边：和前向边相反，是节点 v 连接到 dfs 树中 v 的祖先节点 w 的边，如 L-&gt;B，E-&gt;C</li>
-<li>横向边：其它的在 DFS树 中不存在祖先和后代关系，但是在CFG中有边连接的点的边，如 J-&gt;L，H-&gt;M</li>
-</ul>
-<h2 id="3-深度优先遍历代码举例"><a href="#3-深度优先遍历代码举例" class="headerlink" title="3. 深度优先遍历代码举例"></a>3. 深度优先遍历代码举例</h2><p>我们简单实现一个基于深度优先遍历流图的算法（基于 jgrapht 实现）：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DFSIterator</span>&lt;V&gt; &#123;</span><br><span class="line">    <span class="comment">// 以图的形式创建 DFS树</span></span><br><span class="line">    <span class="keyword">private</span> Graph&lt;V, DefaultEdge&gt; dfsTree;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// dfn序，List形式存储</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;V&gt; iteratorOrder;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 记录已经访问的节点列表</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;V&gt; visited;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">DFSIterator</span><span class="params">(Graph&lt;V, DefaultEdge&gt; graph, V entry)</span> &#123;</span><br><span class="line">        iteratorOrder = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(graph.vertexSet().size());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在 DFS树 中添加所有的节点，等后面遍历时，再添加边</span></span><br><span class="line">        dfsTree = <span class="keyword">new</span> <span class="title class_">DefaultDirectedGraph</span>&lt;&gt;(DefaultEdge.class);</span><br><span class="line">        graph.vertexSet().forEach(vertex -&gt; dfsTree.addVertex(vertex));</span><br><span class="line"></span><br><span class="line">        iteratorOrder = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(graph.vertexSet().size());</span><br><span class="line"></span><br><span class="line">        visited = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        dfs(graph, entry, <span class="literal">null</span>, dfsTree, iteratorOrder, visited);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 深度优先遍历流图</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> graph 待遍历的流图</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> curNode 当前正要遍历的节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> preNode 上一个节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dfsTree 深度优先生成树</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> iteratorOrder 节点的遍历顺序，将基于该list获取每个节点的dfn</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> visited 记录节点是否已经完成遍历</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">dfs</span><span class="params">(Graph&lt;V, DefaultEdge&gt; graph, V curNode, V preNode, Graph&lt;V, DefaultEdge&gt; dfsTree, List&lt;V&gt; iteratorOrder, Set&lt;V&gt; visited)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (visited.contains(curNode)) &#123;</span><br><span class="line">            <span class="keyword">return</span>;  <span class="comment">// 如果已经完成遍历，则直接返回</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        visited.add(curNode);  <span class="comment">// 将当前节点放入到已访问节点</span></span><br><span class="line">        iteratorOrder.add(curNode);  <span class="comment">// 将当前节点直接塞到遍历节点序列中，这个序列就表示了节点的遍历顺序</span></span><br><span class="line">        <span class="keyword">if</span> (preNode != <span class="literal">null</span>) &#123;</span><br><span class="line">            dfsTree.addEdge(preNode, curNode);  <span class="comment">// 在 DFS树 中添加边</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 基于深度优先遍历当前节点的子节点</span></span><br><span class="line">        graph.outgoingEdgesOf(curNode).forEach(edge -&gt; &#123;</span><br><span class="line">            dfs(graph, graph.getEdgeTarget(edge), curNode, dfsTree, iteratorOrder, visited);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Graph&lt;V, DefaultEdge&gt; <span class="title function_">getDfsTree</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.dfsTree;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Map&lt;V, Integer&gt; <span class="title function_">getDfn</span><span class="params">()</span> &#123;</span><br><span class="line">        Map&lt;V, Integer&gt; dfn = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        <span class="comment">// 将遍历顺序转成 Map 形式，并且 dfn 下标从 1 开始</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; iteratorOrder.size(); i++) &#123;</span><br><span class="line">            dfn.put(iteratorOrder.get(i), i + <span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> dfn;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们通过下面的方式，初始化一个 jgrapht 图（和前面的例子一致），然后使用我们前面创建的深度优先遍历类进行遍历：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DFSIteratorTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 1. 初始化流图</span></span><br><span class="line">        Graph&lt;String, DefaultEdge&gt; graph = initGraph();</span><br><span class="line"></span><br><span class="line">        DFSIterator&lt;String&gt; dfsIterator = <span class="keyword">new</span> <span class="title class_">DFSIterator</span>&lt;&gt;(graph, <span class="string">&quot;A&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">var</span> <span class="variable">dfsTree</span> <span class="operator">=</span> dfsIterator.getDfsTree();</span><br><span class="line">        System.out.println(<span class="string">&quot;====&gt; DFS Tree:&quot;</span>);</span><br><span class="line">        System.out.println(dfsTree);</span><br><span class="line">        </span><br><span class="line">        <span class="type">var</span> <span class="variable">dfn</span> <span class="operator">=</span> dfsIterator.getDfn();</span><br><span class="line">        System.out.println(<span class="string">&quot;====&gt; DFN:&quot;</span>);</span><br><span class="line">        dfn.entrySet().forEach(entry -&gt; System.out.println(entry.getKey() + <span class="string">&quot; -&gt; &quot;</span> + entry.getValue()));</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> DefaultDirectedGraph&lt;String, DefaultEdge&gt; <span class="title function_">initGraph</span><span class="params">()</span> &#123;</span><br><span class="line">        DefaultDirectedGraph&lt;String, DefaultEdge&gt; graph = <span class="keyword">new</span> <span class="title class_">DefaultDirectedGraph</span>&lt;&gt;(DefaultEdge.class);</span><br><span class="line"></span><br><span class="line">        graph.addVertex(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;C&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;D&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;E&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;F&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;G&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;H&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;I&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;J&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;K&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;L&quot;</span>);</span><br><span class="line">        graph.addVertex(<span class="string">&quot;M&quot;</span>);</span><br><span class="line"></span><br><span class="line">        graph.addEdge(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;B&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;B&quot;</span>, <span class="string">&quot;G&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;C&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;C&quot;</span>, <span class="string">&quot;H&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;D&quot;</span>, <span class="string">&quot;F&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;D&quot;</span>, <span class="string">&quot;G&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;E&quot;</span>, <span class="string">&quot;H&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;E&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;F&quot;</span>, <span class="string">&quot;I&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;F&quot;</span>, <span class="string">&quot;K&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;G&quot;</span>, <span class="string">&quot;J&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;H&quot;</span>, <span class="string">&quot;M&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;I&quot;</span>, <span class="string">&quot;L&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;J&quot;</span>, <span class="string">&quot;I&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;K&quot;</span>, <span class="string">&quot;L&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;L&quot;</span>, <span class="string">&quot;M&quot;</span>);</span><br><span class="line">        graph.addEdge(<span class="string">&quot;L&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> graph;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>上面代码，打印出来的 DFS树 和 dfn序 如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">====&gt; DFS Tree:</span><br><span class="line">([A, B, C, D, E, F, G, H, I, J, K, L, M], [(A,B), (B,D), (D,F), (F,I), (I,L), (L,M), (F,K), (D,G), (G,J), (A,C), (C,E), (E,H)])</span><br><span class="line">====&gt; DFN:</span><br><span class="line">A -&gt; 1</span><br><span class="line">B -&gt; 2</span><br><span class="line">C -&gt; 11</span><br><span class="line">D -&gt; 3</span><br><span class="line">E -&gt; 12</span><br><span class="line">F -&gt; 4</span><br><span class="line">G -&gt; 9</span><br><span class="line">H -&gt; 13</span><br><span class="line">I -&gt; 5</span><br><span class="line">J -&gt; 10</span><br><span class="line">K -&gt; 8</span><br><span class="line">L -&gt; 6</span><br><span class="line">M -&gt; 7</span><br></pre></td></tr></table></figure>
-
-<p><strong>说明</strong>：在 jgrapht 中，原本就有实现一个针对通用图的深度优先遍历的算法，大家可以参考：<a href="https://jgrapht.org/javadoc/org.jgrapht.core/org/jgrapht/traverse/DepthFirstIterator.html">DepthFirstIterator</a>。该实现算法跟《算法导论》中的介绍一致（遍历的时候，根据节点遍历情况，分 白色、灰色、黑色），这里不再介绍了。</p>
-<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p>《算法导论》22.3 节<br>《现代编译原理》19.2 节</p>
+<h3 id="2-3-SSA"><a href="#2-3-SSA" class="headerlink" title="2.3 SSA"></a>2.3 SSA</h3><p>SSA 的生成方式介绍，<font color="red">待补充</font></p>
+<h3 id="2-4-CG"><a href="#2-4-CG" class="headerlink" title="2.4 CG"></a>2.4 CG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-5-ICFG"><a href="#2-5-ICFG" class="headerlink" title="2.5 ICFG"></a>2.5 ICFG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-6-CDG、DDG、PDG、SDG"><a href="#2-6-CDG、DDG、PDG、SDG" class="headerlink" title="2.6 CDG、DDG、PDG、SDG"></a>2.6 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
+<h3 id="2-7-PAG、VFG"><a href="#2-7-PAG、VFG" class="headerlink" title="2.7 PAG、VFG"></a>2.7 PAG、VFG</h3><p><font color="red">待补充</font></p>
 ]]></content>
       <categories>
-        <category>图论</category>
-        <category>流图遍历</category>
+        <category>程序分析</category>
+        <category>程序表示</category>
+        <category>程序表示概述</category>
       </categories>
       <tags>
-        <tag>流图</tag>
-        <tag>深度优先遍历</tag>
-        <tag>深度优先搜索树</tag>
+        <tag>AST</tag>
+        <tag>程序表示</tag>
+        <tag>CFG</tag>
+        <tag>PDG</tag>
+        <tag>CDG</tag>
+        <tag>DDG</tag>
+        <tag>SDG</tag>
+        <tag>SSA</tag>
       </tags>
   </entry>
   <entry>
@@ -406,267 +574,10 @@
       </categories>
       <tags>
         <tag>AST</tag>
+        <tag>CFG</tag>
         <tag>SSA</tag>
         <tag>三地址码</tag>
-        <tag>CFG</tag>
         <tag>BasicBlock</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【转载】JavaParser应用介绍</title>
-    <url>/2022/10/25/program-representation-javaparser-intro/</url>
-    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96">https://xie.infoq.cn/article/6f8ff63d6b88480c05f805d96</a></p>
-<h2 id="0-Java-Parser-基本信息"><a href="#0-Java-Parser-基本信息" class="headerlink" title="0. Java Parser 基本信息"></a>0. Java Parser 基本信息</h2><p>Java Parser 是当前应用的最火的 Java Parser 工具，当前 GitHub 上，该开源项目已经有 3.4k star，而且协议非常友好，可以应用到商用工具上面，因此使用率非常高。</p>
-<p>Java Parser 是基于 JavaCC 做为 Java 语言词法解析的工具，支持 Java 语言生成 AST，在 AST 基础上进行类型推断分析，支持修改 AST 从而生成新的 Java 文件内容，支持从 Java 1.0 到 14 所有的版本的 AST 解析。</p>
-<span id="more"></span>
-
-<p>Java Parser 的组件架构（<a href="https://javaparser.org/code-style-architecture/%EF%BC%89%E5%A6%82%E4%B8%8B%E5%9B%BE%E6%89%80%E7%A4%BA%EF%BC%9A">https://javaparser.org/code-style-architecture/）如下图所示：</a></p>
-<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser.png"></p>
-<center>图 0-1 Java Parser 组件架构</center>
-
-<p>本文讨论 Java Parser 面向 Java 规范检查方向的一些内容，因此我们不关心 Java Parser 在修改 AST 和重新生成 Java 文件方面的作用，着重介绍在生成 AST、AST 遍历、解析、类型推断及应用。</p>
-<p>说明：本文中所有的代码的完成代码，可以参考<a href="https://gitee.com/maijun/javaparser-test/tree/master">https://gitee.com/maijun/javaparser-test/tree/master</a>(<font color="red">暂时下线，待优化上线</font>)。</p>
-<h2 id="1-Java-Parser-AST-生成及打印"><a href="#1-Java-Parser-AST-生成及打印" class="headerlink" title="1. Java Parser AST 生成及打印"></a>1. Java Parser AST 生成及打印</h2><h3 id="1-1-Java-Parser-生成-AST"><a href="#1-1-Java-Parser-生成-AST" class="headerlink" title="1.1 Java Parser 生成 AST"></a>1.1 Java Parser 生成 AST</h3><p>Java Parser 转换生成 AST，有很多方法，主要支持两大类方式：</p>
-<h4 id="1-输入为文件"><a href="#1-输入为文件" class="headerlink" title="1) 输入为文件"></a>1) 输入为文件</h4><p>输入为文件，即针对完整的文件为输入，生成整个文件的 AST（对于 Java 来说，如果是整个 Java 文件，AST 的根节点为 CompilationUnit），这种方式，可以完整保留源码的代码行信息，这样方便进行分析。对于文件为输入，即输入文件路径（多种写法，例如 String、File、Path、Resource 等，其实都是表示文件路径），同时可以指定文件的编码方式，下面的用例，指定的是 nio 的 Path 格式的路径。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1. 转换的是完整的Java文件</span></span><br><span class="line"><span class="type">File</span> <span class="variable">base</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">relativePath</span> <span class="operator">=</span> <span class="string">&quot;test-case/javaparser-testcase/src/main/java/zmj/test/thread/MyThread.java&quot;</span>;</span><br><span class="line"><span class="type">String</span> <span class="variable">absolutePath</span> <span class="operator">=</span> base.getCanonicalPath() + File.separator + relativePath;</span><br><span class="line">ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(Paths.get(absolutePath));</span><br><span class="line">result.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-输入为代码片段"><a href="#2-输入为代码片段" class="headerlink" title="2) 输入为代码片段"></a>2) 输入为代码片段</h4><p>输入为代码片段时，一定要是一种标准的符合一定格式的能够识别为语句或者表达式的代码片段，例如 <code>int x</code> 是一个 VariableDeclarationExpr，<code>x = 3</code> 是一个 AssignExpr，但是，如果代码片段写成 <code>x + 3 = y</code>，则不符合基本的 Java 的语法。</p>
-<p>下面是一个基本的关于这种用法的例子（如果要看完整支持的功能，可以看 Java Parser 的 API 文档）。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 2. 转换的为部分代码片段</span></span><br><span class="line">ParseResult&lt;VariableDeclarationExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseVariableDeclarationExpr(<span class="string">&quot;int x = 3&quot;</span>);</span><br><span class="line">System.out.println(exprResult.getResult().get());</span><br><span class="line">exprResult.getResult().ifPresent(YamlPrinter::print);</span><br></pre></td></tr></table></figure>
-
-<p>事实上，我们可以将完整的 Java 文件内容都读到一个字符串里面，然后传递给 Java Parser，来获取 AST，即针对完整的 Java 文件，以代码片段的方式来解析获取 AST，这样也是可以的。但是我们不推荐这样做，因为直接传递文件，可以保留完整的代码行信息，但是传递的如果是代码片段，则代码行信息被丢失掉了。</p>
-<h3 id="1-2-Java-Parser-AST-打印"><a href="#1-2-Java-Parser-AST-打印" class="headerlink" title="1.2 Java Parser AST 打印"></a>1.2 Java Parser AST 打印</h3><p>Java Parser AST 打印有多种方式，当前支持三种打印方式：Yaml、XML 和 Graphiz 可以识别的 dot 的图片生成的格式。</p>
-<p>如下面的代码所示，我们针对一个简单的语句（<code>x = 3 + 4</code>），生成了 Yaml、XML 和 Graphiz dot 的输出：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AstPrinter</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        ParseResult&lt;AssignExpr&gt; exprResult = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parseExpression(<span class="string">&quot;x = 3 + 4&quot;</span>);</span><br><span class="line">        Optional&lt;AssignExpr&gt; expr = exprResult.getResult();</span><br><span class="line">        <span class="comment">// 1. Yaml格式输出打印</span></span><br><span class="line">        expr.ifPresent(YamlPrinter::print);</span><br><span class="line">        <span class="comment">// 2. XML格式输出打印</span></span><br><span class="line">        expr.ifPresent(XmlPrinter::print);</span><br><span class="line">        <span class="comment">// 3. dot打印(可以通过Graphiz dot命令，将输出生成为图片格式，例如 dot -Tpng ast.dot &gt; ast.png)</span></span><br><span class="line">        expr.ifPresent(e -&gt; System.out.println(<span class="keyword">new</span> <span class="title class_">DotPrinter</span>(<span class="literal">true</span>).output(e)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="1-Yaml-格式输出"><a href="#1-Yaml-格式输出" class="headerlink" title="1) Yaml 格式输出"></a>1) Yaml 格式输出</h4><p>输出的 Yaml 格式如下：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">root(Type=AssignExpr):</span></span><br><span class="line">    <span class="attr">operator:</span> <span class="string">&quot;ASSIGN&quot;</span></span><br><span class="line">    <span class="string">target(Type=NameExpr):</span></span><br><span class="line">        <span class="string">name(Type=SimpleName):</span></span><br><span class="line">        <span class="attr">identifier:</span> <span class="string">&quot;x&quot;</span></span><br><span class="line">    <span class="string">value(Type=BinaryExpr):</span></span><br><span class="line">        <span class="attr">operator:</span> <span class="string">&quot;PLUS&quot;</span></span><br><span class="line">        <span class="string">left(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;3&quot;</span></span><br><span class="line">        <span class="string">right(Type=IntegerLiteralExpr):</span></span><br><span class="line">            <span class="attr">value:</span> <span class="string">&quot;4&quot;</span></span><br><span class="line"><span class="string">...</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="2-XML-格式输出"><a href="#2-XML-格式输出" class="headerlink" title="2) XML 格式输出"></a>2) XML 格式输出</h4><p>输出的 XML 格式如下（原始输出是只有一个字符串，这里我简单进行了处理，添加了换行和缩进）：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">root</span> <span class="attr">type</span>=<span class="string">&#x27;AssignExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;ASSIGN&#x27;</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">target</span> <span class="attr">type</span>=<span class="string">&#x27;NameExpr&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">name</span> <span class="attr">type</span>=<span class="string">&#x27;SimpleName&#x27;</span> <span class="attr">identifier</span>=<span class="string">&#x27;x&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">value</span> <span class="attr">type</span>=<span class="string">&#x27;BinaryExpr&#x27;</span> <span class="attr">operator</span>=<span class="string">&#x27;PLUS&#x27;</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">left</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;3&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">left</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">right</span> <span class="attr">type</span>=<span class="string">&#x27;IntegerLiteralExpr&#x27;</span> <span class="attr">value</span>=<span class="string">&#x27;4&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">right</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">root</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="3-Graphiz-dot-输出"><a href="#3-Graphiz-dot-输出" class="headerlink" title="3) Graphiz dot 输出"></a>3) Graphiz dot 输出</h4><p>首先打印的内容如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">digraph &#123;</span><br><span class="line">n0 [label=&quot;root (AssignExpr)&quot;];</span><br><span class="line">n1 [label=&quot;operator=&#x27;ASSIGN&#x27;&quot;];</span><br><span class="line">n0 -&gt; n1;</span><br><span class="line">n2 [label=&quot;target (NameExpr)&quot;];</span><br><span class="line">n0 -&gt; n2;</span><br><span class="line">n3 [label=&quot;name (SimpleName)&quot;];</span><br><span class="line">n2 -&gt; n3;</span><br><span class="line">n4 [label=&quot;identifier=&#x27;x&#x27;&quot;];</span><br><span class="line">n3 -&gt; n4;</span><br><span class="line">n5 [label=&quot;value (BinaryExpr)&quot;];</span><br><span class="line">n0 -&gt; n5;</span><br><span class="line">n6 [label=&quot;operator=&#x27;PLUS&#x27;&quot;];</span><br><span class="line">n5 -&gt; n6;</span><br><span class="line">n7 [label=&quot;left (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n7;</span><br><span class="line">n8 [label=&quot;value=&#x27;3&#x27;&quot;];</span><br><span class="line">n7 -&gt; n8;</span><br><span class="line">n9 [label=&quot;right (IntegerLiteralExpr)&quot;];</span><br><span class="line">n5 -&gt; n9;</span><br><span class="line">n10 [label=&quot;value=&#x27;4&#x27;&quot;];</span><br><span class="line">n9 -&gt; n10;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>将上面的内容写入 ast.dot 文件中，使用命令 dot -Tpng ast.dot &gt; ast.png 即可得到一个图片，如下：</p>
-<p><img src="/2022/10/25/program-representation-javaparser-intro/javaparser-dot.png"></p>
-<p>差不多算是一个 AST 的树状结构的一个样子了。</p>
-<h2 id="2-Java-Parser-AST-遍历"><a href="#2-Java-Parser-AST-遍历" class="headerlink" title="2. Java Parser AST 遍历"></a>2. Java Parser AST 遍历</h2><p>在 Java Parser 中，AST 的遍历采用的是访问者模式，在访问者模式的基础上，增加了一个简单的包装器（这里就不再介绍什么是访问者模式和包装器模式了，在另外一篇文章里面，有关于访问者模式的详细介绍）。下面代码中定义了两个非常简单的 visitor，其中一个访问函数调用表达式，打印所有的函数调用的代码，第二个访问所有的函数定义信息，将当前类中定义的函数都打印出来。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TestVisitor</span> <span class="keyword">extends</span> <span class="title class_">GenericVisitorAdapter</span>&lt;Void, Void&gt; &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodCallExpr n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function call: &quot;</span> + n.toString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Void <span class="title function_">visit</span><span class="params">(MethodDeclaration n, Void arg)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;function declaration: &quot;</span> + n.getNameAsString());</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>注意：一个非常重要的地方，每个 visit 方法写完，都需要调用 <code>super.visit(n,arg)</code>; 因为在基类是一个包装器，实现了节点的遍历，如果不调用，当前节点处理完，程序就结束了。</p>
-<h2 id="3-Java-Parser-类型推断"><a href="#3-Java-Parser-类型推断" class="headerlink" title="3. Java Parser 类型推断"></a>3. Java Parser 类型推断</h2><h4 id="3-1-Symbol-Solver"><a href="#3-1-Symbol-Solver" class="headerlink" title="3.1 Symbol Solver"></a>3.1 Symbol Solver</h4><p>在 Java 中，所有的 Name 等都被称为 Symbol，包括变量、类型、方法等。一般提到类型推断，就是对 Symbol 的操作。所以我们这里提一下 Symbol Solver，因为所有的 Type Solver 都是针对特定的 Symbol 工作的（即 TypeSolver 需要封装在 SymbolSolver 中才能工作）。</p>
-<h4 id="3-2-Type-Solver"><a href="#3-2-Type-Solver" class="headerlink" title="3.2 Type Solver"></a>3.2 Type Solver</h4><p>Java Parser 类型推断有多种类型推断方式，如下表：</p>
-<ul>
-<li>AarTypeSolver: 在 Android aar 文件中查找特定的类型;</li>
-<li>ClassLoaderTypeSolver: 针对自定义的 ClassLoader 使用，可以处理由该 ClassLoader 加载的类，这种类型在静态代码分析中很少用到;</li>
-<li>CombinedTypeSolver: 可以封装多个 Type Solver 一起使用</li>
-<li>JarTypeSolver: 在 Jar 文件中，查找特定的类型</li>
-<li>JavaParserTypeSolver: 在源码中查找特定的类型，只需要传递源码根路径即可</li>
-<li>MemoryTypeSolver: 一般不需要使用，可以在测试中使用</li>
-<li>ReflectionTypeSolver: 用来处理应用 classpath 里面的类，一般用于处理 JRE 中的类</li>
-</ul>
-<p>下面介绍一个简单的例子（这个是一个简单的 maven 工程，但是为了测试 jar 的依赖，我先收集所有依赖的 jar 到项目下面的一个路径下，执行的命令为：<code>mvn dependency:copy-dependencies -DoutputDirectory=lib</code>）。</p>
-<p>这一个普通的 Java 应用，需要处理的类型有三个来源：① 当前自己工程中定义；② 当前工程的第三方依赖；③ JRE 中的基本类型。对应上面的 JavaParserTypeSolver，JarTypeSolver 和 ReflectionTypeSolver，组合成一个 CombinedTypeSolver，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> CombinedTypeSolver <span class="title function_">generateTypeSolver</span><span class="params">(String sourcePath, String libPath)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">CombinedTypeSolver</span> <span class="variable">solver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CombinedTypeSolver</span>();</span><br><span class="line">    <span class="comment">// 1. JavaParserTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">JavaParserTypeSolver</span>(sourcePath));</span><br><span class="line">    <span class="comment">// 2. JarTypeSolver</span></span><br><span class="line">    <span class="type">FindFileVisitor</span> <span class="variable">findJarVisitor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FindFileVisitor</span>(<span class="string">&quot;.jar&quot;</span>);</span><br><span class="line">    Files.walkFileTree(Paths.get(libPath), findJarVisitor);</span><br><span class="line">    <span class="keyword">for</span> (String name : findJarVisitor.getFileNameList()) &#123;</span><br><span class="line">        solver.add(<span class="keyword">new</span> <span class="title class_">JarTypeSolver</span>(name));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 3. ReflectionTypeSolver</span></span><br><span class="line">    solver.add(<span class="keyword">new</span> <span class="title class_">ReflectionTypeSolver</span>());</span><br><span class="line">    <span class="keyword">return</span> solver;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后构造的 TypeSolver 传递给 JavaParser：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">TypeSolver</span> <span class="variable">typeSolver</span> <span class="operator">=</span> generateTypeSolver(base.getCanonicalPath() + File.separator + sourcePath,</span><br><span class="line">                            base.getCanonicalPath() + File.separator + libPath);</span><br><span class="line"><span class="type">JavaSymbolSolver</span> <span class="variable">symbolSolver</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaSymbolSolver</span>(typeSolver);</span><br><span class="line"><span class="type">ParserConfiguration</span> <span class="variable">configuration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ParserConfiguration</span>();</span><br><span class="line">configuration.setSymbolResolver(symbolSolver);</span><br><span class="line"><span class="type">JavaParser</span> <span class="variable">parser</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaParser</span>(configuration);</span><br></pre></td></tr></table></figure>
-
-<p>下面介绍三类主要的类型处理内容：</p>
-<ul>
-<li>对变量（表达式）类型的推断</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析变量的类型定义</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve variable type&quot;</span>);</span><br><span class="line">mce.getScope().ifPresent(expression -&gt; &#123;</span><br><span class="line">    <span class="type">ResolvedType</span> <span class="variable">resolvedType</span> <span class="operator">=</span> expression.calculateResolvedType();</span><br><span class="line">    System.out.println(expression.toString() + <span class="string">&quot; is a: &quot;</span> + resolvedType);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>用例的部分结果输出：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">System.out is a: ReferenceType&#123;java.io.PrintStream, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">m is a: ReferenceType&#123;zmj.test.thread.MyThread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">HashBasedTable is a: ReferenceType&#123;com.google.common.collect.HashBasedTable, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.HashBasedTable.V=TypeVariable &#123;JavassistTypeParameter&#123;V&#125;&#125;, com.google.common.collect.HashBasedTable.R=TypeVariable &#123;JavassistTypeParameter&#123;R&#125;&#125;, com.google.common.collect.HashBasedTable.C=TypeVariable &#123;JavassistTypeParameter&#123;C&#125;&#125;&#125;&#125;&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve variable type</span><br><span class="line">tt is a: ReferenceType&#123;com.google.common.collect.Table, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;com.google.common.collect.Table.C=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.V=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;, com.google.common.collect.Table.R=ReferenceType&#123;java.lang.String, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如上，可以计算诸如表达式（System.out）、变量（m，tt）、静态类（HashBasedTable）等的类型，而且支持第三方库的类型推断（HashBasedTable 为 google guava 库中的类型）。</p>
-<ul>
-<li>对函数签名的推断</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析函数调用的函数声明</span></span><br><span class="line">System.out.println(<span class="string">&quot;----&gt; resolve method declaration&quot;</span>);</span><br><span class="line"><span class="type">JavaParserFacade</span> <span class="variable">javaParserFacade</span> <span class="operator">=</span> JavaParserFacade.get(typeSolver);</span><br><span class="line">SymbolReference&lt;ResolvedMethodDeclaration&gt; resolvedMethodDeclarationSymbolReference = javaParserFacade.solve(mce);</span><br><span class="line">System.out.println(<span class="string">&quot;is resolved: &quot;</span> + resolvedMethodDeclarationSymbolReference.isSolved());</span><br><span class="line">System.out.println(<span class="string">&quot;resolved type&quot;</span> + resolvedMethodDeclarationSymbolReference.getCorrespondingDeclaration());</span><br></pre></td></tr></table></figure>
-
-<p>如上，为了对函数签名进行推断，需要先构造出来一个 JavaParserFacade 对象，也是通过 typeSolver 构造出来的。上面的部分输出如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">-------------------------------------</span><br><span class="line">System.out.println(&quot;Hello World!&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public void java.io.PrintStream.println(java.lang.String)&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">m.start()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeReflectionMethodDeclaration&#123;method=public synchronized void java.lang.Thread.start()&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">HashBasedTable.create()</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@6c8156fd[public static create ()Lcom/google/common/collect/HashBasedTable;]&#125;</span><br><span class="line">-------------------------------------</span><br><span class="line">tt.put(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)</span><br><span class="line">----&gt; resolve method declaration</span><br><span class="line">is resolved: true</span><br><span class="line">resolved typeJavassistMethodDeclaration&#123;ctMethod=javassist.CtMethod@f9f9cbbc[public abstract put (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;]&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如上所示，对函数签名推断得非常准确，包括静态方法和实例方法，抽象、函数形参类型、返回值类型、函数所在的类等，都推断得非常准确。</p>
-<ul>
-<li>对类继承关系推断</li>
-</ul>
-<p>如下的代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 解析类的继承关系</span></span><br><span class="line">System.out.println(<span class="string">&quot;---- resolve class extend relation&quot;</span>);</span><br><span class="line">cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cid -&gt; &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;current class: &quot;</span> + cid.getFullyQualifiedName().get());</span><br><span class="line">    NodeList&lt;ClassOrInterfaceType&gt; superTypes = cid.getExtendedTypes();</span><br><span class="line">    superTypes.forEach(type -&gt; System.out.println(<span class="string">&quot;super class: &quot;</span> + type.resolve()));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>输出如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.App</span><br><span class="line">---- resolve class extend relation</span><br><span class="line">current class: zmj.test.thread.MyThread</span><br><span class="line">super class: ReferenceType&#123;java.lang.Thread, typeParametersMap=TypeParametersMap&#123;nameToValue=&#123;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当前只定义了两个类，一个是 App，没有定义父类（直接就是 Object），没有打印，MyThread 是一个线程，获取到了父类的类型。</p>
-<h2 id="4-Java-Parser-简单应用"><a href="#4-Java-Parser-简单应用" class="headerlink" title="4. Java Parser 简单应用"></a>4. Java Parser 简单应用</h2><h3 id="4-1-源码间依赖关系分析"><a href="#4-1-源码间依赖关系分析" class="headerlink" title="4.1 源码间依赖关系分析"></a>4.1 源码间依赖关系分析</h3><p>如第 3.2 节中介绍的例子，可以非常方便地基于类型推断获取如下信息：</p>
-<ul>
-<li>当前类的父类或者父接口，并递归获取所有的父类和父接口；</li>
-<li>获取当前所调用函数的 signature（函数签名，包含可以唯一识别一个方法的所有信息，例如所在的类、名字、形参类型列表、返回值类型），从而拿到函数调用关系；</li>
-</ul>
-<p>另外，再结合源码文件和 Java 类定义的对应关系，可以很方便地构造出工程的 CG 图，识别出源码之间的依赖关系分析。</p>
-<h3 id="4-2-Java-代码度量"><a href="#4-2-Java-代码度量" class="headerlink" title="4.2 Java 代码度量"></a>4.2 Java 代码度量</h3><p>实际上，基于 Java Parser 获得的 AST 信息，辅助类型推断特性，可以实现针对源代码的各种度量内容。可以参考<a href="https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508%EF%BC%8C">https://www.exida.com/Blog/software-metrics-iso-26262-iec-61508，</a> 查看常见的代码度量项。针对其中 3.1 所列出的所有的项都可以度量。</p>
-<p>常见的一些度量项：</p>
-<ul>
-<li><p>针对函数：圈复杂度、代码深度、各类代码行信息、调用函数数量、被调用次数、其他诸如入参个数…；</p>
-</li>
-<li><p>针对文件：总代码行、空行、注释行、非空非注释行、代码注释密度…；</p>
-</li>
-<li><p>针对工程：文件总数、代码行总数、平均代码行…</p>
-</li>
-</ul>
-<p>基于 Java Parser 可以很好地进行实现，而且大部分都不需要完整的依赖信息，可以方便地进行度量。</p>
-<h3 id="4-3-Java-规范支持检查"><a href="#4-3-Java-规范支持检查" class="headerlink" title="4.3 Java 规范支持检查"></a>4.3 Java 规范支持检查</h3><p>当前，针对各类规范支持，可以在不同的层面上进行支持，例如直接对源码检查、对解析得到的 Token 进行检查、对 AST 进行检查、在 CFG 和 CG 上进行数据流检查和各种形式化检查等。</p>
-<p>基于 Java Parser，可以实现在 AST 及源码（可以直接读取源码信息）、Token（从 AST 的节点可以获取当前 AST Node 中的所有的 Token）相结合的所有检查。</p>
-<p>例如，PMD 主要是在 AST 上进行的检查，CheckStyle 主要是在 Token 和 AST 上进行的检查，结合类型推断的支持，Java Parser 可以实现比 PMD 和 CheckStyle 更精确的检查。</p>
-]]></content>
-      <categories>
-        <category>程序分析</category>
-        <category>程序表示</category>
-        <category>AST解析与操作</category>
-      </categories>
-      <tags>
-        <tag>JavaParser</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【转载】访问者模式及其在 Java Parser 中的应用</title>
-    <url>/2022/10/26/program-representation-visitor/</url>
-    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28">https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28</a></p>
-<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。</p>
-<span id="more"></span>
-
-<p>本文将首先介绍访问者模式的概念和相关知识，然后通过 JavaParser 的源码分析，介绍访问者模式具体的应用。</p>
-<h2 id="2-访问者模式介绍"><a href="#2-访问者模式介绍" class="headerlink" title="2. 访问者模式介绍"></a>2. 访问者模式介绍</h2><h3 id="2-1-引例"><a href="#2-1-引例" class="headerlink" title="2.1 引例"></a>2.1 引例</h3><p>首先我们通过一个案例来引入对访问者模式的介绍。</p>
-<p>杭州是一个美丽的城市，每年会有大量的游客到杭州过来游玩，美丽的西湖和香火鼎盛的灵隐寺都是游客必往之地。而对于美丽的西湖，又有断桥残雪、三潭印月等西湖十景，灵隐寺景区还有济公殿、大雄宝殿等不同的建筑。</p>
-<p>我们假定每个游客到达杭州，就会游玩上面所有的地方，我们就可以针对这位游客的这次游玩进行打包操作，不需要对游玩断桥残雪进行特殊操作。我们应该怎么办呢？</p>
-<p><img src="/2022/10/26/program-representation-visitor/hangzhou_visitor.png"></p>
-<center>图 2.1 杭州游览路线</center>
-
-<p>首先，对于上面每个地方，每个人都可能有不同的访问行为，有游客到济公殿会看看墙上济公的故事，有的游客可能就对济公殿很熟悉，进去拜一下就出来了，有的到了断桥残雪感慨一句全是人头，也有人到了断桥残雪，就会会回味一下张祜的诗句。</p>
-<p>其次，对于上面每个地方，对于不同的游客来说，不确定，所以，不管是谁，给他准备个入口进来总不会有问题。</p>
-<p>结合上面分析，我们可以初步分析访问者模式是怎么一回事儿：<strong>在每个游客自己内部，把对每个景点想操作的行为定义出来，然后在每个景点，准备个接口，把游客迎进来，最后呢，把这个游客迎进来之后呢，执行这个游客里面定义的，关于自己的行为</strong>。</p>
-<p><img src="/2022/10/26/program-representation-visitor/hangzhou_visit_design.png"></p>
-<center>图 2.2 访问者模式之游览杭州</center>
-
-<ul>
-<li><p>抽象访问者(Visitor，游客)角色：声明访问者可以访问哪些元素（景点），具体到程序中就是 visit 方法中的参数定义哪些对象是可以被访问的。该操作接口的名字和参数标识了发送访问请求给具体访问者的具体元素角色。这样访问者就可以通过该元素角色的特定接口直接访问它；</p>
-</li>
-<li><p>具体访问者(Concrete Visitor，张三和李四)角色：实现抽象访问者所声明的方法接口，也就是抽象访问者所声明的各个访问操作。它影响到访问者访问到一个对象（景点）后该干什么，要做什么事情；</p>
-</li>
-<li><p>抽象节点(Node，景点)角色：声明接受哪一类访问者访问，程序上是通过 accept 方法中的参数来定义的，该方法接受一个访问者对象作为一个参数。并且声明了在该节点上可以进行的操作；</p>
-</li>
-<li><p>具体元素(Concrete Element，三潭印月、济公殿等)角色：实现抽象节点类所声明的 accept 方法，通常都是 visitor.visit(this)，基本上已经形成一种定式了，并实现该具体节点上可以进行的操作；</p>
-</li>
-<li><p>结构对象(Object  Structure)角色：可以遍历结构中的所有元素；可以提供一个高层次的接口让访问者对象可以访问每一个元素；可以设计成一个复合对象或者一个聚集，例如 List，在我们实际静态代码分析中，是一个树形结构。</p>
-</li>
-</ul>
-<h3 id="2-2-示例代码"><a href="#2-2-示例代码" class="headerlink" title="2.2 示例代码"></a>2.2 示例代码</h3><p>下面这部分贴出来上面示例的代码，为了方便对应，命名也都还采用了中文命名。</p>
-<p>景点接口及其实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> interface 景点 &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 杭州 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 西湖 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 断桥残雪 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 三潭印月 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 灵隐寺 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 大雄宝殿 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 济公殿 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>访问者接口及其实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> interface 游客 &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(杭州 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(西湖 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(三潭印月 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(断桥残雪 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(灵隐寺 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(大雄宝殿 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(济公殿 景点)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 张三游客 implements 游客 &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(杭州 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到杭州&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(西湖 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到西湖&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(三潭印月 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到三潭印月&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(断桥残雪 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到断桥残雪，人真多&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(灵隐寺 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到灵隐寺&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(大雄宝殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到大雄宝殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(济公殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到济公殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 李四游客 implements 游客 &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(杭州 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到杭州&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(西湖 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到西湖&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(三潭印月 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到三潭印月&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(断桥残雪 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到断桥残雪，哈哈哈&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(灵隐寺 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到灵隐寺&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(大雄宝殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到大雄宝殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(济公殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到济公殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>景点结构实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 景点结构 &#123;</span><br><span class="line">    <span class="comment">// 树形结构更能说明静态代码分析AST问题，也更能模拟该场景</span></span><br><span class="line">    <span class="comment">// 这里图省事儿，就拿一个List表示了</span></span><br><span class="line">    List&lt;景点&gt; nodes = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visitAll</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span>(景点 node : nodes) &#123;</span><br><span class="line">            node.accept(visitor);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">(景点 node)</span> &#123;</span><br><span class="line">        nodes.add(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>示例代码入口：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        景点结构 structure = <span class="keyword">new</span> 景点结构();</span><br><span class="line">        structure.add(<span class="keyword">new</span> 杭州());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 西湖());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 三潭印月());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 断桥残雪());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 灵隐寺());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 大雄宝殿());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 济公殿());</span><br><span class="line"></span><br><span class="line">        游客 zhangsanVisitor = <span class="keyword">new</span> 张三游客();</span><br><span class="line">        structure.visitAll(zhangsanVisitor);</span><br><span class="line"></span><br><span class="line">        游客 lisiVisitor = <span class="keyword">new</span> 李四游客();</span><br><span class="line">        structure.visitAll(lisiVisitor);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-基于包装器的访问者模式访问优化"><a href="#3-基于包装器的访问者模式访问优化" class="headerlink" title="3. 基于包装器的访问者模式访问优化"></a>3. 基于包装器的访问者模式访问优化</h2><p>上面介绍访问者模式时，我们构造了一个 List 类型的景点结构，然后在访问时，我们自己在景点结构中执行了遍历操作，遍历所有的节点，然后分别执行节点的 accept 方法，接受访客的访问。那么在结构很复杂的场景下，我们还适合这样遍历吗？下面，我们将切到我们主要想介绍的编程语言的 AST 遍历上，来讨论这个问题。</p>
-<p>因为编程语言的语法结构，语法是固定的，但是，基于这些语法，却可以有非常多的实现，if 是一个 Statement，包含有 condition（条件）和实现的 body，而 body 又可以有非常多的 Statement 组成，当然就可以包含 if 语句。虽然当我们将一个文件，比如 Java 文件的 AST 完整构造出来，那么它的 AST 就已经确定了，然后我们就可以在 AST 中，使用 visitAll 来<strong>递归遍历</strong> AST 中所有的节点，包括每个节点的子节点，但是却非常麻烦。</p>
-<p>在这里，我们来介绍一种基于包装器的优化访问者模式的访问的方法，这种方法，也是 JavaParser 中采用的。</p>
-<p>首先，我们再拿前面的游客来杭州游玩来举例子，游客可以自己过来玩，当然就要自己设计游览路线，所有的事情都要自己做，但是同样，可以跟团来旅游啊！跟团过来旅游，就相当于创建了一个包装器，旅行团将整个旅游过程打包了，游客需要跟团走，然后在每个景点可以自己游玩。比如<strong>首先旅游团把游客带到断桥残雪，然后游客发出“全是人头”的感慨，然后再听导游介绍断桥残雪的典故，然后，有旅游团将你带到下一个景点（例如三潭音乐）</strong>，整个过程，游客只需要对自己行为进行定义，然后就是听旅游团安排。</p>
-<p>其中：</p>
-<ul>
-<li><p>旅游团：就相当于一个包装类，对旅游的路线进行包装，也可以定义自己的旅游的行为，例如某些介绍，一般只做路径遍历（旅游路线）的规划；</p>
-</li>
-<li><p>游客：在包装器模式下，游客在实现好自己的 visit 行为之后，需要调用旅游团（即父类）的 visit 的行为，所以，一般我们写好 visit 方法，通常还要调用 super.visit 方法。</p>
-</li>
-</ul>
-<p>这里包装器，只是一种简单的包装器模式，如果想详细了解包装器模式的使用，可以自己搜索相关资料。</p>
-<h2 id="4-JavaParser-中访问者模式应用"><a href="#4-JavaParser-中访问者模式应用" class="headerlink" title="4. JavaParser 中访问者模式应用"></a>4. JavaParser 中访问者模式应用</h2><p>这里，我们通过实现一个检测空的 catch 块的功能，简单介绍如何自己定义访问器，并且介绍其中访问者模式和包装器模式的应用。在 JavaParser 中，Catch 块类型为 CatchClause。</p>
-<p>首先，在 VoidVisitor 接口中，定义了一个访问访问 CatchClause 的接口：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(CatchClause n, A arg)</span>;</span><br></pre></td></tr></table></figure>
-
-<p>其中，A 为泛型，表示可以传入的数据类型，我们简单示例，实现时，A 就为 Object。</p>
-<p>然后，在包装器类中，定义了 VoidVisitorAdapter 中，定义了一个实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(<span class="keyword">final</span> CatchClause n, <span class="keyword">final</span> A arg)</span> &#123;</span><br><span class="line">    n.getBody().accept(<span class="built_in">this</span>, arg);</span><br><span class="line">    n.getParameter().accept(<span class="built_in">this</span>, arg);</span><br><span class="line">    n.getComment().ifPresent((l) -&gt; &#123;</span><br><span class="line">        l.accept(<span class="built_in">this</span>, arg);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如上，在包装器类中，对 CatchClause 依次获取所有的子节点，然后使用放弃访问器进行遍历（实际上，就是定义了遍历 AST 节点的路径，AST 是一种树状结构，依次访问每个节点的子节点，可以最终完成对整棵树的遍历）。</p>
-<p>我们自己实现一个访问器：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.stmt.CatchClause;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.stmt.Statement;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.visitor.VoidVisitorAdapter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EmptyCatchBlockRule</span> <span class="keyword">extends</span> <span class="title class_">VoidVisitorAdapter</span>&lt;Object&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(<span class="keyword">final</span> CatchClause n, <span class="keyword">final</span> Object arg)</span> &#123;</span><br><span class="line">        List&lt;Statement&gt; statements = n.getBody().getStatements();</span><br><span class="line">        <span class="keyword">if</span> (statements == <span class="literal">null</span> || statements.size() == <span class="number">0</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;empty catch block found at line: &quot;</span> + n.getBegin().get().line);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如上，因为我们只关心空的 Catch 块的问题，因此我们将只对 visit CatchClause 类型节点的实现，当当前访问器访问到我们自己没有实现的节点时，将直接调用包装器中的实现，而包装器实现的，就是获取所有的子节点来遍历，直到再次找到 CatchClause，来执行自己写的访问器实现。</p>
-<p>当然，如第三部分的介绍，最后的 <code>super.visit(n, arg);</code> 语句是不可缺少的，因为 Catch 块中，仍然可以包含 Catch 块，如果我们在这部分没有调父类的 visit 方法，将导致当前 Catch 块中的子 Catch 块无法遍历到。</p>
-<p>最后，我们写一个入口类，对此进行检查：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.github.javaparser.JavaParser;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ParseResult;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.CompilationUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.FileNotFoundException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.Charset;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">sourcePath</span> <span class="operator">=</span> <span class="string">&quot;D:\\workspace\\idea\\test\\scs-java\\src\\main\\java\\zmj\\cert\\analyze\\rule\\Test.java&quot;</span>;</span><br><span class="line">        <span class="type">FileInputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(sourcePath);</span><br><span class="line">        ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(in, Charset.defaultCharset());</span><br><span class="line">        <span class="keyword">if</span> (result.getResult().isPresent()) &#123;</span><br><span class="line">            result.getResult().get().accept(<span class="keyword">new</span> <span class="title class_">EmptyCatchBlockRule</span>(), <span class="literal">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里，我们只需要对测试的代码（Test.java）整体生成 AST，然后调用 accept 方法，就可以完成对整棵树的遍历（遍历操作在包装器类中实现），上面代码执行完，结果如下：</p>
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">empty catch block found at line: 8</span><br></pre></td></tr></table></figure>
-
-<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>本文中，介绍了如下内容：</p>
-<p>(1) 介绍了访问者模式的基本概念和思路，并结合案例，详细介绍了访问者模式的使用方法；</p>
-<p>(2) 介绍了如何通过访问者模式，结合使用简单包装器模式，简化复杂元素结构的遍历；</p>
-<p>(3) 介绍了 JavaParser 中，访问者模式的基本应用；</p>
-<p>(4) 介绍了一个简单的 Java 缺陷的检查的代码，实际上，Java 静态代码分析工具 PMD，就是基于该思路进行的开发。</p>
-<p>本文主要目的是介绍访问者模式在 JavaParser 中的应用，或者更进一步，介绍访问者模式如果在基于 AST 遍历的静态代码分析工具中的缺陷检查上的应用（只要是能够生成 AST 的语言，都可以有类似实现）。</p>
-]]></content>
-      <categories>
-        <category>程序分析</category>
-        <category>程序表示</category>
-        <category>AST解析与操作</category>
-      </categories>
-      <tags>
-        <tag>visitor设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>用于静态代码分析的程序表示——概述</title>
-    <url>/2022/10/24/program-representation/</url>
-    <content><![CDATA[<h2 id="1-程序的语法和语义"><a href="#1-程序的语法和语义" class="headerlink" title="1. 程序的语法和语义"></a>1. 程序的语法和语义</h2><p>对于现代编程语言，都有语法和语义两层含义，这里做个比较浅显的介绍。</p>
-<h3 id="1-1-语法"><a href="#1-1-语法" class="headerlink" title="1.1 语法"></a>1.1 语法</h3><p>语法，就是代码怎么写的问题。比如 Java 中，可以写 <code>int z = x + y;</code>，就是不能写成 <code>int z = x y +</code>；当然，我们不排除某些语言，会把二元表达式，写成这种逆波兰式的写法，但是至少 Java 这种语言，是使用中缀表达式的写法。</p>
-<span id="more"></span>
-
-<p>放到我们的日常交流中，就是话怎么说的问题，比如 “你吃饭了没？”，不会说成“饭吃你了没？”。</p>
-<p>我们在看编译原理相关的教材的时候，我们可以知道，程序的语法，是通过文法来进行实现的，并且编译原理中，有大量的篇幅，都在介绍文法（尤其是上下文无关文法）的知识。</p>
-<p>这里，涉及到程序文法的内容，我们统统都不进行介绍。因为，程序分析虽然脱胎与编译原理，但是高于编译原理。<strong>在现实中，我们实现的静态代码分析工具，都是在程序编写正常，并且一般都可以正常运行的情况下使用的</strong>。我们实现的静态代码分析工具不需要从零开始构造。</p>
-<p>通常，我们实现静态代码分析工具，并不太需要了解文法知识。我们可以直接通过 Antlr4 或者 javacc 等直接获取代码的解析树（具体语法树），当然，如果工作中有需要修改 Antlr4 的 g4 文件，或者自己设计 DSL，就需要学习一些文法的知识。Antlr4 的 g4 文件格式，就是一种上下文无关的文法。</p>
-<h3 id="1-2-语义"><a href="#1-2-语义" class="headerlink" title="1.2 语义"></a>1.2 语义</h3><p>语义，就是代码的含义是什么，比如上面的例子，就表示 <strong>新声明一个变量，其初值是 x 和 y 的和</strong>。</p>
-<p>说的再通俗一点儿，语义，就是告诉我们这样的某一句话是什么意思，用来做什么事情的，比如日常交流的时候，问“你吃饭了没？”，就不是问题“你要去哪里？”。</p>
-<p>我们大部分的分析，都需要结合程序的语义进行分析，我们需要知道代码的作用，才能知道代码可能有什么问题。我们知道某段代码执行了打印的动作，我们才能去看是否有敏感信息泄露的问题，而不会在上面查 SQL 注入的问题。</p>
-<p>至于涉及到程序设计的语义分析（比如操作语义、指称语义、公理语义什么的），这些我们都不用关心。到我们程序分析这一层，就是知道这段代码执行的结果会是什么，就可以了。</p>
-<h2 id="2-常用的程序分析的表示"><a href="#2-常用的程序分析的表示" class="headerlink" title="2. 常用的程序分析的表示"></a>2. 常用的程序分析的表示</h2><p>下面会将程序分析的程序表示分成几部分：</p>
-<h3 id="2-1-AST、三地址码、SSA形式"><a href="#2-1-AST、三地址码、SSA形式" class="headerlink" title="2.1 AST、三地址码、SSA形式"></a>2.1 AST、三地址码、SSA形式</h3><p>这三个概念，都是程序的直接转换表示，可以认为是原代码的其它等价形式。</p>
-<ul>
-<li>这三个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
-<li>AST 的生成方式和获取，请参考 <a href="https://maijun-sec.github.io/2022/10/25/program-representation-ast-gen/">用于静态代码分析的程序表示——AST获取</a>。</li>
-<li>三地址码 的生成方式介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-2-CFG、BasicBlock"><a href="#2-2-CFG、BasicBlock" class="headerlink" title="2.2 CFG、BasicBlock"></a>2.2 CFG、BasicBlock</h3><p>这两个概念，是将程序中，每个过程转换成了图的形式，有了一点儿代码执行流的味道。</p>
-<ul>
-<li>涉及到这两个概念的含义，请参考 <a href="https://maijun-sec.github.io/2022/10/24/program-representation-ast-ssa/">静态代码分析中间表示基本概念——AST、三地址码、CFG、SSA概念</a>。</li>
-<li>BasicBlock和CFG的构造的介绍，<font color="red">待补充</font></li>
-</ul>
-<h3 id="2-3-SSA"><a href="#2-3-SSA" class="headerlink" title="2.3 SSA"></a>2.3 SSA</h3><p>SSA 的生成方式介绍，<font color="red">待补充</font></p>
-<h3 id="2-4-CG"><a href="#2-4-CG" class="headerlink" title="2.4 CG"></a>2.4 CG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-5-ICFG"><a href="#2-5-ICFG" class="headerlink" title="2.5 ICFG"></a>2.5 ICFG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-6-CDG、DDG、PDG、SDG"><a href="#2-6-CDG、DDG、PDG、SDG" class="headerlink" title="2.6 CDG、DDG、PDG、SDG"></a>2.6 CDG、DDG、PDG、SDG</h3><p><font color="red">待补充</font></p>
-<h3 id="2-7-PAG、VFG"><a href="#2-7-PAG、VFG" class="headerlink" title="2.7 PAG、VFG"></a>2.7 PAG、VFG</h3><p><font color="red">待补充</font></p>
-]]></content>
-      <categories>
-        <category>程序分析</category>
-        <category>程序表示</category>
-        <category>程序表示概述</category>
-      </categories>
-      <tags>
-        <tag>AST</tag>
-        <tag>SSA</tag>
-        <tag>CFG</tag>
-        <tag>程序表示</tag>
-        <tag>PDG</tag>
-        <tag>CDG</tag>
-        <tag>DDG</tag>
-        <tag>SDG</tag>
       </tags>
   </entry>
   <entry>
@@ -815,6 +726,95 @@
       </categories>
       <tags>
         <tag>程序分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【转载】访问者模式及其在 Java Parser 中的应用</title>
+    <url>/2022/10/26/program-representation-visitor/</url>
+    <content><![CDATA[<p><strong>说明</strong>：本文是作者首发在 infoq 上的原创文章，原文链接是：<a href="https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28">https://xie.infoq.cn/article/5f80da3c014fd69f8dbe09b28</a></p>
+<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>访问者模式，是 Java 设计模式中广泛使用的一种设计模式，尤其是在 AST 的遍历中使用更加普遍。在静态代码分析中，有部分类型的缺陷，可以通过简单遍历 AST 结构完成，例如在 finally 中执行 return 操作，空的 catch 块等。很多静态代码分析工具，也就应用了这种设计模式，例如 Java 静态代码分析工具 PMD，而且，很多 AST 中间表示，已经直接对访问者模式进行了支持，例如 Eclipse JDT、JavaParser 等。</p>
+<span id="more"></span>
+
+<p>本文将首先介绍访问者模式的概念和相关知识，然后通过 JavaParser 的源码分析，介绍访问者模式具体的应用。</p>
+<h2 id="2-访问者模式介绍"><a href="#2-访问者模式介绍" class="headerlink" title="2. 访问者模式介绍"></a>2. 访问者模式介绍</h2><h3 id="2-1-引例"><a href="#2-1-引例" class="headerlink" title="2.1 引例"></a>2.1 引例</h3><p>首先我们通过一个案例来引入对访问者模式的介绍。</p>
+<p>杭州是一个美丽的城市，每年会有大量的游客到杭州过来游玩，美丽的西湖和香火鼎盛的灵隐寺都是游客必往之地。而对于美丽的西湖，又有断桥残雪、三潭印月等西湖十景，灵隐寺景区还有济公殿、大雄宝殿等不同的建筑。</p>
+<p>我们假定每个游客到达杭州，就会游玩上面所有的地方，我们就可以针对这位游客的这次游玩进行打包操作，不需要对游玩断桥残雪进行特殊操作。我们应该怎么办呢？</p>
+<p><img src="/2022/10/26/program-representation-visitor/hangzhou_visitor.png"></p>
+<center>图 2.1 杭州游览路线</center>
+
+<p>首先，对于上面每个地方，每个人都可能有不同的访问行为，有游客到济公殿会看看墙上济公的故事，有的游客可能就对济公殿很熟悉，进去拜一下就出来了，有的到了断桥残雪感慨一句全是人头，也有人到了断桥残雪，就会会回味一下张祜的诗句。</p>
+<p>其次，对于上面每个地方，对于不同的游客来说，不确定，所以，不管是谁，给他准备个入口进来总不会有问题。</p>
+<p>结合上面分析，我们可以初步分析访问者模式是怎么一回事儿：<strong>在每个游客自己内部，把对每个景点想操作的行为定义出来，然后在每个景点，准备个接口，把游客迎进来，最后呢，把这个游客迎进来之后呢，执行这个游客里面定义的，关于自己的行为</strong>。</p>
+<p><img src="/2022/10/26/program-representation-visitor/hangzhou_visit_design.png"></p>
+<center>图 2.2 访问者模式之游览杭州</center>
+
+<ul>
+<li><p>抽象访问者(Visitor，游客)角色：声明访问者可以访问哪些元素（景点），具体到程序中就是 visit 方法中的参数定义哪些对象是可以被访问的。该操作接口的名字和参数标识了发送访问请求给具体访问者的具体元素角色。这样访问者就可以通过该元素角色的特定接口直接访问它；</p>
+</li>
+<li><p>具体访问者(Concrete Visitor，张三和李四)角色：实现抽象访问者所声明的方法接口，也就是抽象访问者所声明的各个访问操作。它影响到访问者访问到一个对象（景点）后该干什么，要做什么事情；</p>
+</li>
+<li><p>抽象节点(Node，景点)角色：声明接受哪一类访问者访问，程序上是通过 accept 方法中的参数来定义的，该方法接受一个访问者对象作为一个参数。并且声明了在该节点上可以进行的操作；</p>
+</li>
+<li><p>具体元素(Concrete Element，三潭印月、济公殿等)角色：实现抽象节点类所声明的 accept 方法，通常都是 visitor.visit(this)，基本上已经形成一种定式了，并实现该具体节点上可以进行的操作；</p>
+</li>
+<li><p>结构对象(Object  Structure)角色：可以遍历结构中的所有元素；可以提供一个高层次的接口让访问者对象可以访问每一个元素；可以设计成一个复合对象或者一个聚集，例如 List，在我们实际静态代码分析中，是一个树形结构。</p>
+</li>
+</ul>
+<h3 id="2-2-示例代码"><a href="#2-2-示例代码" class="headerlink" title="2.2 示例代码"></a>2.2 示例代码</h3><p>下面这部分贴出来上面示例的代码，为了方便对应，命名也都还采用了中文命名。</p>
+<p>景点接口及其实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> interface 景点 &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 杭州 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 西湖 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 断桥残雪 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 三潭印月 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 灵隐寺 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 大雄宝殿 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 济公殿 implements 景点&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">accept</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        visitor.visit(<span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>访问者接口及其实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> interface 游客 &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(杭州 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(西湖 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(三潭印月 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(断桥残雪 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(灵隐寺 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(大雄宝殿 景点)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(济公殿 景点)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 张三游客 implements 游客 &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(杭州 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到杭州&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(西湖 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到西湖&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(三潭印月 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到三潭印月&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(断桥残雪 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到断桥残雪，人真多&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(灵隐寺 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到灵隐寺&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(大雄宝殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到大雄宝殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(济公殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;张三来到济公殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 李四游客 implements 游客 &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(杭州 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到杭州&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(西湖 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到西湖&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(三潭印月 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到三潭印月&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(断桥残雪 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到断桥残雪，哈哈哈&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(灵隐寺 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到灵隐寺&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(大雄宝殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到大雄宝殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(济公殿 景点)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;李四来到济公殿&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>景点结构实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> class 景点结构 &#123;</span><br><span class="line">    <span class="comment">// 树形结构更能说明静态代码分析AST问题，也更能模拟该场景</span></span><br><span class="line">    <span class="comment">// 这里图省事儿，就拿一个List表示了</span></span><br><span class="line">    List&lt;景点&gt; nodes = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visitAll</span><span class="params">(游客 visitor)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span>(景点 node : nodes) &#123;</span><br><span class="line">            node.accept(visitor);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">(景点 node)</span> &#123;</span><br><span class="line">        nodes.add(node);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>示例代码入口：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Client</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        景点结构 structure = <span class="keyword">new</span> 景点结构();</span><br><span class="line">        structure.add(<span class="keyword">new</span> 杭州());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 西湖());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 三潭印月());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 断桥残雪());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 灵隐寺());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 大雄宝殿());</span><br><span class="line">        structure.add(<span class="keyword">new</span> 济公殿());</span><br><span class="line"></span><br><span class="line">        游客 zhangsanVisitor = <span class="keyword">new</span> 张三游客();</span><br><span class="line">        structure.visitAll(zhangsanVisitor);</span><br><span class="line"></span><br><span class="line">        游客 lisiVisitor = <span class="keyword">new</span> 李四游客();</span><br><span class="line">        structure.visitAll(lisiVisitor);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-基于包装器的访问者模式访问优化"><a href="#3-基于包装器的访问者模式访问优化" class="headerlink" title="3. 基于包装器的访问者模式访问优化"></a>3. 基于包装器的访问者模式访问优化</h2><p>上面介绍访问者模式时，我们构造了一个 List 类型的景点结构，然后在访问时，我们自己在景点结构中执行了遍历操作，遍历所有的节点，然后分别执行节点的 accept 方法，接受访客的访问。那么在结构很复杂的场景下，我们还适合这样遍历吗？下面，我们将切到我们主要想介绍的编程语言的 AST 遍历上，来讨论这个问题。</p>
+<p>因为编程语言的语法结构，语法是固定的，但是，基于这些语法，却可以有非常多的实现，if 是一个 Statement，包含有 condition（条件）和实现的 body，而 body 又可以有非常多的 Statement 组成，当然就可以包含 if 语句。虽然当我们将一个文件，比如 Java 文件的 AST 完整构造出来，那么它的 AST 就已经确定了，然后我们就可以在 AST 中，使用 visitAll 来<strong>递归遍历</strong> AST 中所有的节点，包括每个节点的子节点，但是却非常麻烦。</p>
+<p>在这里，我们来介绍一种基于包装器的优化访问者模式的访问的方法，这种方法，也是 JavaParser 中采用的。</p>
+<p>首先，我们再拿前面的游客来杭州游玩来举例子，游客可以自己过来玩，当然就要自己设计游览路线，所有的事情都要自己做，但是同样，可以跟团来旅游啊！跟团过来旅游，就相当于创建了一个包装器，旅行团将整个旅游过程打包了，游客需要跟团走，然后在每个景点可以自己游玩。比如<strong>首先旅游团把游客带到断桥残雪，然后游客发出“全是人头”的感慨，然后再听导游介绍断桥残雪的典故，然后，有旅游团将你带到下一个景点（例如三潭音乐）</strong>，整个过程，游客只需要对自己行为进行定义，然后就是听旅游团安排。</p>
+<p>其中：</p>
+<ul>
+<li><p>旅游团：就相当于一个包装类，对旅游的路线进行包装，也可以定义自己的旅游的行为，例如某些介绍，一般只做路径遍历（旅游路线）的规划；</p>
+</li>
+<li><p>游客：在包装器模式下，游客在实现好自己的 visit 行为之后，需要调用旅游团（即父类）的 visit 的行为，所以，一般我们写好 visit 方法，通常还要调用 super.visit 方法。</p>
+</li>
+</ul>
+<p>这里包装器，只是一种简单的包装器模式，如果想详细了解包装器模式的使用，可以自己搜索相关资料。</p>
+<h2 id="4-JavaParser-中访问者模式应用"><a href="#4-JavaParser-中访问者模式应用" class="headerlink" title="4. JavaParser 中访问者模式应用"></a>4. JavaParser 中访问者模式应用</h2><p>这里，我们通过实现一个检测空的 catch 块的功能，简单介绍如何自己定义访问器，并且介绍其中访问者模式和包装器模式的应用。在 JavaParser 中，Catch 块类型为 CatchClause。</p>
+<p>首先，在 VoidVisitor 接口中，定义了一个访问访问 CatchClause 的接口：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(CatchClause n, A arg)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>其中，A 为泛型，表示可以传入的数据类型，我们简单示例，实现时，A 就为 Object。</p>
+<p>然后，在包装器类中，定义了 VoidVisitorAdapter 中，定义了一个实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(<span class="keyword">final</span> CatchClause n, <span class="keyword">final</span> A arg)</span> &#123;</span><br><span class="line">    n.getBody().accept(<span class="built_in">this</span>, arg);</span><br><span class="line">    n.getParameter().accept(<span class="built_in">this</span>, arg);</span><br><span class="line">    n.getComment().ifPresent((l) -&gt; &#123;</span><br><span class="line">        l.accept(<span class="built_in">this</span>, arg);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上，在包装器类中，对 CatchClause 依次获取所有的子节点，然后使用放弃访问器进行遍历（实际上，就是定义了遍历 AST 节点的路径，AST 是一种树状结构，依次访问每个节点的子节点，可以最终完成对整棵树的遍历）。</p>
+<p>我们自己实现一个访问器：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.stmt.CatchClause;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.stmt.Statement;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.visitor.VoidVisitorAdapter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EmptyCatchBlockRule</span> <span class="keyword">extends</span> <span class="title class_">VoidVisitorAdapter</span>&lt;Object&gt; &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visit</span><span class="params">(<span class="keyword">final</span> CatchClause n, <span class="keyword">final</span> Object arg)</span> &#123;</span><br><span class="line">        List&lt;Statement&gt; statements = n.getBody().getStatements();</span><br><span class="line">        <span class="keyword">if</span> (statements == <span class="literal">null</span> || statements.size() == <span class="number">0</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;empty catch block found at line: &quot;</span> + n.getBegin().get().line);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">super</span>.visit(n, arg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上，因为我们只关心空的 Catch 块的问题，因此我们将只对 visit CatchClause 类型节点的实现，当当前访问器访问到我们自己没有实现的节点时，将直接调用包装器中的实现，而包装器实现的，就是获取所有的子节点来遍历，直到再次找到 CatchClause，来执行自己写的访问器实现。</p>
+<p>当然，如第三部分的介绍，最后的 <code>super.visit(n, arg);</code> 语句是不可缺少的，因为 Catch 块中，仍然可以包含 Catch 块，如果我们在这部分没有调父类的 visit 方法，将导致当前 Catch 块中的子 Catch 块无法遍历到。</p>
+<p>最后，我们写一个入口类，对此进行检查：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.github.javaparser.JavaParser;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ParseResult;</span><br><span class="line"><span class="keyword">import</span> com.github.javaparser.ast.CompilationUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.FileNotFoundException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.Charset;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> FileNotFoundException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">sourcePath</span> <span class="operator">=</span> <span class="string">&quot;D:\\workspace\\idea\\test\\scs-java\\src\\main\\java\\zmj\\cert\\analyze\\rule\\Test.java&quot;</span>;</span><br><span class="line">        <span class="type">FileInputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(sourcePath);</span><br><span class="line">        ParseResult&lt;CompilationUnit&gt; result = <span class="keyword">new</span> <span class="title class_">JavaParser</span>().parse(in, Charset.defaultCharset());</span><br><span class="line">        <span class="keyword">if</span> (result.getResult().isPresent()) &#123;</span><br><span class="line">            result.getResult().get().accept(<span class="keyword">new</span> <span class="title class_">EmptyCatchBlockRule</span>(), <span class="literal">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里，我们只需要对测试的代码（Test.java）整体生成 AST，然后调用 accept 方法，就可以完成对整棵树的遍历（遍历操作在包装器类中实现），上面代码执行完，结果如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">empty catch block found at line: 8</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>本文中，介绍了如下内容：</p>
+<p>(1) 介绍了访问者模式的基本概念和思路，并结合案例，详细介绍了访问者模式的使用方法；</p>
+<p>(2) 介绍了如何通过访问者模式，结合使用简单包装器模式，简化复杂元素结构的遍历；</p>
+<p>(3) 介绍了 JavaParser 中，访问者模式的基本应用；</p>
+<p>(4) 介绍了一个简单的 Java 缺陷的检查的代码，实际上，Java 静态代码分析工具 PMD，就是基于该思路进行的开发。</p>
+<p>本文主要目的是介绍访问者模式在 JavaParser 中的应用，或者更进一步，介绍访问者模式如果在基于 AST 遍历的静态代码分析工具中的缺陷检查上的应用（只要是能够生成 AST 的语言，都可以有类似实现）。</p>
+]]></content>
+      <categories>
+        <category>程序分析</category>
+        <category>程序表示</category>
+        <category>AST解析与操作</category>
+      </categories>
+      <tags>
+        <tag>visitor设计模式</tag>
       </tags>
   </entry>
 </search>
