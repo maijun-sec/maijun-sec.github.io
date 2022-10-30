@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-30T02:10:10.151Z</updated>
+  <updated>2022-10-30T02:16:15.507Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://maijun-sec.github.io/2022/10/27/graph-search-basic/"/>
     <id>https://maijun-sec.github.io/2022/10/27/graph-search-basic/</id>
     <published>2022-10-27T14:30:10.000Z</published>
-    <updated>2022-10-30T02:10:10.151Z</updated>
+    <updated>2022-10-30T02:16:15.507Z</updated>
     
     
     <summary type="html">&lt;h2 id=&quot;1-流图&quot;&gt;&lt;a href=&quot;#1-流图&quot; class=&quot;headerlink&quot; title=&quot;1. 流图&quot;&gt;&lt;/a&gt;1. 流图&lt;/h2&gt;&lt;p&gt;本文介绍的图虽然部分适用于通用的图论知识，但是因为主要是为静态分析的基础算法服务的，因此还是对分析的图结构进行限制。&lt;/p&gt;
