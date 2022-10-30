@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-30T02:16:15.507Z</updated>
+  <updated>2022-10-30T03:19:03.553Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -15,6 +15,38 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>流图的广度优先遍历</title>
+    <link href="https://maijun-sec.github.io/2022/10/30/graph-search-bfs/"/>
+    <id>https://maijun-sec.github.io/2022/10/30/graph-search-bfs/</id>
+    <published>2022-10-30T02:18:19.000Z</published>
+    <updated>2022-10-30T03:19:03.553Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;1-流图遍历引入&quot;&gt;&lt;a href=&quot;#1-流图遍历引入&quot; class=&quot;headerlink&quot; title=&quot;1. 流图遍历引入&quot;&gt;&lt;/a&gt;1. 流图遍历引入&lt;/h2&gt;&lt;p&gt;流图有两种遍历方式：深度优先遍历 和 广度优先遍历。&lt;/p&gt;
+&lt;p&gt;针对</summary>
+        
+      
+    
+    
+    
+    <category term="图论" scheme="https://maijun-sec.github.io/categories/%E5%9B%BE%E8%AE%BA/"/>
+    
+    <category term="流图遍历" scheme="https://maijun-sec.github.io/categories/%E5%9B%BE%E8%AE%BA/%E6%B5%81%E5%9B%BE%E9%81%8D%E5%8E%86/"/>
+    
+    
+    <category term="流图" scheme="https://maijun-sec.github.io/tags/%E6%B5%81%E5%9B%BE/"/>
+    
+    <category term="广度优先遍历" scheme="https://maijun-sec.github.io/tags/%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E9%81%8D%E5%8E%86/"/>
+    
+    <category term="广度优先搜索树" scheme="https://maijun-sec.github.io/tags/%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2%E6%A0%91/"/>
+    
+  </entry>
   
   <entry>
     <title>流图的深度优先遍历</title>
@@ -166,11 +198,11 @@
     
     <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
     
-    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
-    
     <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
     <category term="三地址码" scheme="https://maijun-sec.github.io/tags/%E4%B8%89%E5%9C%B0%E5%9D%80%E7%A0%81/"/>
+    
+    <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
     
     <category term="BasicBlock" scheme="https://maijun-sec.github.io/tags/BasicBlock/"/>
     
@@ -198,9 +230,11 @@
     
     <category term="AST" scheme="https://maijun-sec.github.io/tags/AST/"/>
     
-    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
+    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
     <category term="CFG" scheme="https://maijun-sec.github.io/tags/CFG/"/>
+    
+    <category term="程序表示" scheme="https://maijun-sec.github.io/tags/%E7%A8%8B%E5%BA%8F%E8%A1%A8%E7%A4%BA/"/>
     
     <category term="PDG" scheme="https://maijun-sec.github.io/tags/PDG/"/>
     
@@ -209,8 +243,6 @@
     <category term="DDG" scheme="https://maijun-sec.github.io/tags/DDG/"/>
     
     <category term="SDG" scheme="https://maijun-sec.github.io/tags/SDG/"/>
-    
-    <category term="SSA" scheme="https://maijun-sec.github.io/tags/SSA/"/>
     
   </entry>
   

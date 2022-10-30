@@ -152,7 +152,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -163,7 +163,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -195,6 +195,107 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://maijun-sec.github.io/2022/10/30/graph-search-bfs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="maijun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="程序静态分析技术笔记">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 程序静态分析技术笔记">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/10/30/graph-search-bfs/" class="post-title-link" itemprop="url">流图的广度优先遍历</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-10-30 10:18:19 / 修改时间：11:19:03" itemprop="dateCreated datePublished" datetime="2022-10-30T10:18:19+08:00">2022-10-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%9B%BE%E8%AE%BA/" itemprop="url" rel="index"><span itemprop="name">图论</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%9B%BE%E8%AE%BA/%E6%B5%81%E5%9B%BE%E9%81%8D%E5%8E%86/" itemprop="url" rel="index"><span itemprop="name">流图遍历</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="1-流图遍历引入"><a href="#1-流图遍历引入" class="headerlink" title="1. 流图遍历引入"></a>1. 流图遍历引入</h2><p>流图有两种遍历方式：深度优先遍历 和 广度优先遍历。</p>
+<p>针对 流图的概念，和 流图的深度优先遍历，大家可以参考：<a href="https://maijun-sec.github.io/2022/10/27/graph-search-basic">流图的深度优先遍历</a>。</p>
+<p>本文将简单介绍流图的广度优先遍历。</p>
+<h2 id="2-流图的广度优先遍历"><a href="#2-流图的广度优先遍历" class="headerlink" title="2. 流图的广度优先遍历"></a>2. 流图的广度优先遍历</h2><p>广度优先遍历，是一种根据节点到 entry 的远近顺序遍历的一种方法，离 entry 最近的总是被最先遍历。</p>
+<p>下面举个例子进行介绍：</p>
+<p><img src="/2022/10/30/graph-search-bfs/bfs_flowgraph.png"></p>
+<p>我们使用的例子，仍然是我们在介绍深度优先遍历的例子，看上图(左)。</p>
+<p>针对广度优先遍历，我们以下面的表的格式进行介绍：</p>
+<p><img src="/2022/10/30/graph-search-bfs/img_1.png" alt="img_1.png"></p>
+<p>如上，我们首先将 entry A 放到队列中（先进先出）。每次取出最先放进去的节点，然后再将该节点的未遍历的子节点放到队列中。</p>
+<p>例如，第2次，我们取出 A，然后将 A 的两个出边指向的节点 B 和 C 放到队列；</p>
+<p>如果某一次迭代的时候，发现某个出边指向的节点已经有进行遍历，就不会再放，例如 第7次 迭代的 E 节点，因为 H 节点已经遍历过，就不会再重新放。</p>
+<p>最后，就形成了上图(中)的遍历信息：</p>
+<ul>
+<li>绿色实线 表示在遍历中，真正存在遍历序的关系</li>
+<li>红色虚线 表示不需要遍历的边</li>
+</ul>
+<p>由绿色实现组成的树，就是 <strong>广度优先生成树</strong>。</p>
+<h2 id="3-广度优先遍历代码举例"><a href="#3-广度优先遍历代码举例" class="headerlink" title="3. 广度优先遍历代码举例"></a>3. 广度优先遍历代码举例</h2><p>待实现</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
