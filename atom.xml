@@ -6,7 +6,7 @@
   <link href="https://maijun-sec.github.io/atom.xml" rel="self"/>
   
   <link href="https://maijun-sec.github.io/"/>
-  <updated>2022-10-30T05:32:03.570Z</updated>
+  <updated>2022-10-30T07:39:35.730Z</updated>
   <id>https://maijun-sec.github.io/</id>
   
   <author>
@@ -21,17 +21,12 @@
     <link href="https://maijun-sec.github.io/2022/10/30/graph-search-bfs/"/>
     <id>https://maijun-sec.github.io/2022/10/30/graph-search-bfs/</id>
     <published>2022-10-30T02:18:19.000Z</published>
-    <updated>2022-10-30T05:32:03.570Z</updated>
+    <updated>2022-10-30T07:39:35.730Z</updated>
     
     
-      
-      
-        
-        
     <summary type="html">&lt;h2 id=&quot;1-流图遍历引入&quot;&gt;&lt;a href=&quot;#1-流图遍历引入&quot; class=&quot;headerlink&quot; title=&quot;1. 流图遍历引入&quot;&gt;&lt;/a&gt;1. 流图遍历引入&lt;/h2&gt;&lt;p&gt;流图有两种遍历方式：深度优先遍历 和 广度优先遍历。&lt;/p&gt;
-&lt;p&gt;针对</summary>
-        
-      
+&lt;p&gt;针对 流图的概念，和 流图的深度优先遍历，大家可以参考：&lt;a href=&quot;https://maijun-sec.github.io/2022/10/27/graph-search-basic&quot;&gt;流图的深度优先遍历&lt;/a&gt;。&lt;/p&gt;
+&lt;p&gt;本文将简单介绍流图的广度优先遍历。&lt;/p&gt;</summary>
     
     
     

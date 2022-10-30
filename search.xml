@@ -6,6 +6,8 @@
     <content><![CDATA[<h2 id="1-流图遍历引入"><a href="#1-流图遍历引入" class="headerlink" title="1. 流图遍历引入"></a>1. 流图遍历引入</h2><p>流图有两种遍历方式：深度优先遍历 和 广度优先遍历。</p>
 <p>针对 流图的概念，和 流图的深度优先遍历，大家可以参考：<a href="https://maijun-sec.github.io/2022/10/27/graph-search-basic">流图的深度优先遍历</a>。</p>
 <p>本文将简单介绍流图的广度优先遍历。</p>
+<span id="more"></span>
+
 <h2 id="2-流图的广度优先遍历"><a href="#2-流图的广度优先遍历" class="headerlink" title="2. 流图的广度优先遍历"></a>2. 流图的广度优先遍历</h2><p>广度优先遍历，是一种根据节点到 entry 的远近顺序遍历的一种方法，离 entry 最近的总是被最先遍历。</p>
 <p>下面举个例子进行介绍：</p>
 <p><img src="/2022/10/30/graph-search-bfs/bfs_flowgraph.png" alt="流图的深度优先遍历"></p>
